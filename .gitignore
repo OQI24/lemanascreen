@@ -3,3 +3,4 @@
 .cursor/
 skills-lock.json
 *.log
+.venv/

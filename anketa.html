@@ -5,14 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#FFBF2F">
   <meta name="description" content="Офлайн-скринер для отбора участников исследования Лемана ПРО.">
-  <title>Скринер Лемана ПРО</title>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="favicon.svg">
+  <meta name="application-name" content="Скринер Лемана ПРО">
+  <title>Лемана ПРО · Скринер респондентов</title>
+  <link rel="icon" href="favicon.ico?v=2" sizes="any">
+  <link rel="icon" href="favicon-32.png?v=2" type="image/png" sizes="32x32">
+  <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2" sizes="180x180">
+  <script>
+    try {
+      if (localStorage.getItem("lemana_screener_theme") === "dark") {
+        document.documentElement.classList.add("theme-dark");
+      }
+    } catch (_) {}
+  </script>
   <style>
     :root {
       --brand: #FFBF2F;
       --brand-deep: #C5861E;
       --brand-soft: #FFF6E0;
+      --on-brand: #20282B;
       --ink: #20282B;
       --muted: #6A7377;
       --line: #E3E6E7;
@@ -22,13 +33,64 @@
       --danger-bg: #FFF0EE;
       --warning: #8A5A00;
       --warning-bg: #FFF7D6;
+      --chip: #EEF0F0;
+      --chip-hover: #E2E5E6;
+      --hover: #FAFAFA;
+      --input-bg: #ffffff;
+      --control-muted: #F7F8F8;
+      --script-bg: #F4F5F5;
+      --progress-track: #E8EAEA;
+      --switch-off: #D5D9DA;
+      --option-line: #C5CBCD;
+      --option-hover-line: #C9CED0;
+      --strong: #20282B;
+      --on-strong: #ffffff;
+      --focus-ring: rgba(255, 191, 47, .28);
+      --edit-veil: rgba(32, 40, 43, .06);
+      --gate-pass: #1F7A45;
+      --gate-stop: #B42318;
+      --gate-quota: #9A6700;
       --radius: 8px;
       --radius-sm: 6px;
       --space: 12px;
       --control-h: 42px;
-      --gate-pass: #1F7A45;
-      --gate-stop: #B42318;
-      --gate-quota: #9A6700;
+      --search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236A7377' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3-3'/%3E%3C/svg%3E");
+      color-scheme: light;
+    }
+
+    html.theme-dark {
+      --brand: #FFBF2F;
+      --brand-deep: #E0A84A;
+      --brand-soft: #3A3426;
+      --on-brand: #20282B;
+      --ink: #E4E8E9;
+      --muted: #9AA4A8;
+      --line: #3C4548;
+      --surface: #2A3134;
+      --background: #1E2426;
+      --danger: #E5736B;
+      --danger-bg: #3A2C2A;
+      --warning: #D6B15A;
+      --warning-bg: #3A3424;
+      --chip: #343C3F;
+      --chip-hover: #3E474A;
+      --hover: #323A3D;
+      --input-bg: #242B2E;
+      --control-muted: #343C3F;
+      --script-bg: #242B2E;
+      --progress-track: #343C3F;
+      --switch-off: #4A5356;
+      --option-line: #5A6366;
+      --option-hover-line: #6A7377;
+      --strong: #E4E8E9;
+      --on-strong: #1E2426;
+      --focus-ring: rgba(255, 191, 47, .22);
+      --edit-veil: rgba(255, 255, 255, .06);
+      --gate-pass: #6BC48A;
+      --gate-stop: #E5736B;
+      --gate-quota: #D6B15A;
+      --search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239AA4A8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3-3'/%3E%3C/svg%3E");
+      color-scheme: dark;
     }
 
     * { box-sizing: border-box; }
@@ -77,6 +139,12 @@
       flex: 0 0 auto;
     }
 
+    html.theme-dark .brand img {
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: #F0F1F1;
+    }
+
     .brand-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .saved-count {
@@ -84,7 +152,7 @@
       border: 0;
       border-radius: 999px;
       color: var(--muted);
-      background: #EEF0F0;
+      background: var(--chip);
       font-size: 12px;
       font-weight: 600;
       white-space: nowrap;
@@ -112,7 +180,7 @@
       border: 0;
       border-radius: 999px;
       color: var(--ink);
-      background: #EEF0F0;
+      background: var(--chip);
       cursor: pointer;
       font-size: 13px;
       font-weight: 650;
@@ -203,7 +271,7 @@
       height: 22px;
       flex: 0 0 auto;
       border-radius: 999px;
-      background: #D5D9DA;
+      background: var(--switch-off);
       transition: background .15s ease;
     }
 
@@ -215,8 +283,8 @@
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      background: #fff;
-      box-shadow: 0 1px 2px rgba(32, 40, 43, .2);
+      background: var(--surface);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
       transition: transform .15s ease;
     }
 
@@ -243,7 +311,7 @@
       height: 4px;
       overflow: hidden;
       border-radius: 99px;
-      background: #E8EAEA;
+      background: var(--progress-track);
     }
 
     .progress > div {
@@ -282,7 +350,7 @@
       margin: 14px 0;
       padding: 14px 16px;
       border-radius: var(--radius-sm);
-      background: #F4F5F5;
+      background: var(--script-bg);
       color: var(--ink);
       font-size: 15px;
       line-height: 1.5;
@@ -321,7 +389,7 @@
 
     .script-edit-btn:hover {
       color: var(--ink);
-      background: rgba(32, 40, 43, .06);
+      background: var(--edit-veil);
     }
 
     .script-edit-btn:active { transform: scale(0.96); }
@@ -350,7 +418,7 @@
       border-radius: var(--radius-sm);
       outline: none;
       color: var(--ink);
-      background: #F4F5F5;
+      background: var(--script-bg);
       resize: none;
       overflow: auto;
       font: inherit;
@@ -398,7 +466,7 @@
       border-radius: var(--radius-sm);
       outline: none;
       color: var(--ink);
-      background: #fff;
+      background: var(--input-bg);
       transition: border-color .15s, box-shadow .15s;
     }
 
@@ -406,7 +474,7 @@
     select:focus,
     textarea:focus {
       border-color: var(--brand-deep);
-      box-shadow: 0 0 0 3px rgba(255, 191, 47, .28);
+      box-shadow: 0 0 0 3px var(--focus-ring);
     }
 
     .option input[type="radio"],
@@ -417,8 +485,8 @@
       height: 18px;
       margin: 1px 0 0;
       padding: 0;
-      border: 1.5px solid #C5CBCD;
-      background: #fff;
+      border: 1.5px solid var(--option-line);
+      background: var(--input-bg);
       box-shadow: none;
       flex: 0 0 auto;
     }
@@ -430,7 +498,7 @@
     .option input[type="radio"]:checked {
       border-color: var(--brand-deep);
       background:
-        radial-gradient(circle at center, var(--brand-deep) 0 5px, #fff 5.5px);
+        radial-gradient(circle at center, var(--brand-deep) 0 5px, var(--input-bg) 5.5px);
     }
 
     .option input[type="checkbox"]:checked {
@@ -463,7 +531,7 @@
       padding: 0 12px;
       border: 1px solid var(--line);
       border-radius: var(--radius-sm);
-      background: #F7F8F8;
+      background: var(--control-muted);
       font-weight: 700;
     }
 
@@ -480,7 +548,7 @@
       transition: border-color .15s, background .15s;
     }
 
-    .option:hover { border-color: #C9CED0; background: #FAFAFA; }
+    .option:hover { border-color: var(--option-hover-line); background: var(--hover); }
 
     .option:has(input:checked) {
       border-color: var(--brand-deep);
@@ -528,18 +596,60 @@
     .search-select-input {
       width: 100%;
       min-height: var(--control-h);
-      padding: 10px 36px 10px 12px;
+      padding: 10px 40px 10px 12px;
       border: 1px solid var(--line);
       border-radius: var(--radius-sm);
       outline: none;
       color: var(--ink);
-      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236A7377' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3-3'/%3E%3C/svg%3E") no-repeat right 12px center;
+      background-color: var(--input-bg);
+      background-image: var(--search-icon);
+      background-repeat: no-repeat;
+      background-position: right 12px center;
       background-size: 16px;
+    }
+
+    .search-select.has-value .search-select-input {
+      background-image: none;
     }
 
     .search-select-input:focus {
       border-color: var(--brand-deep);
-      box-shadow: 0 0 0 3px rgba(255, 191, 47, .28);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+    .search-select-clear {
+      position: absolute;
+      top: 50%;
+      right: 6px;
+      z-index: 2;
+      display: none;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      transform: translateY(-50%);
+      transition: background .15s, color .15s, transform .1s;
+    }
+
+    .search-select.has-value .search-select-clear {
+      display: grid;
+    }
+
+    .search-select-clear:hover {
+      color: var(--ink);
+      background: var(--edit-veil);
+    }
+
+    .search-select-clear:active { transform: translateY(-50%) scale(0.96); }
+
+    .search-select-clear .btn-ico {
+      width: 16px;
+      height: 16px;
     }
 
     .search-select-list {
@@ -553,8 +663,8 @@
       padding: 4px;
       border: 1px solid var(--line);
       border-radius: var(--radius-sm);
-      background: #fff;
-      box-shadow: 0 8px 20px rgba(32, 40, 43, .10);
+      background: var(--surface);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .18);
     }
 
     .search-select-option {
@@ -582,6 +692,7 @@
     }
 
     .search-select-option.is-selected {
+      color: var(--on-brand);
       background: var(--brand);
     }
 
@@ -629,14 +740,14 @@
     }
 
     .button:active { transform: scale(0.98); }
-    .primary { color: var(--ink); background: var(--brand); }
+    .primary { color: var(--on-brand); background: var(--brand); }
     .primary:hover { background: #F0B122; }
-    .secondary { color: var(--ink); background: #EEF0F0; }
-    .secondary:hover { background: #E2E5E6; }
-    .export { color: #fff; background: var(--ink); }
-    .export:hover { background: #101416; }
+    .secondary { color: var(--ink); background: var(--chip); }
+    .secondary:hover { background: var(--chip-hover); }
+    .export { color: var(--on-strong); background: var(--strong); }
+    .export:hover { filter: brightness(1.08); }
     .danger-btn { color: #fff; background: var(--danger); }
-    .danger-btn:hover { background: #8f1c14; }
+    .danger-btn:hover { filter: brightness(1.08); }
     .button:disabled { cursor: not-allowed; opacity: .45; transform: none; }
 
     .result-icon {
@@ -650,12 +761,12 @@
       font-weight: 800;
     }
 
-    .success-icon { color: var(--ink); background: var(--brand); }
+    .success-icon { color: var(--on-brand); background: var(--brand); }
     .stop-icon { color: var(--danger); background: var(--danger-bg); }
     .result-reason {
       padding: 10px 12px;
       border-radius: var(--radius-sm);
-      background: #F7F8F8;
+      background: var(--control-muted);
       border: 1px solid var(--line);
     }
     .result-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
@@ -694,6 +805,10 @@
               <button type="button" class="service-item" id="importFromStart" role="menuitem">Загрузить Excel</button>
               <button type="button" class="service-switch" id="copyModeToggle" role="menuitemcheckbox" aria-checked="false">
                 <span>Упрощённые текстовки</span>
+                <span class="switch-track" aria-hidden="true"></span>
+              </button>
+              <button type="button" class="service-switch" id="themeToggle" role="menuitemcheckbox" aria-checked="false">
+                <span>Тёмная тема</span>
                 <span class="switch-track" aria-hidden="true"></span>
               </button>
               <button type="button" class="service-item danger" id="resetShiftStart" role="menuitem">Очистка данных</button>
@@ -745,6 +860,7 @@
     localStorage.removeItem("lemana_screener_surveys_v1");
     const STORAGE_KEY = "lemana_screener_surveys_v2";
     const COPY_MODE_KEY = "lemana_screener_copy_mode";
+    const THEME_KEY = "lemana_screener_theme";
     const SCRIPT_SIMPLE_KEY = "lemana_screener_script_simple";
     const app = document.getElementById("app");
     const progressWrap = document.getElementById("progressWrap");
@@ -756,6 +872,8 @@
     const serviceMenu = document.getElementById("serviceMenu");
     const serviceToggle = document.getElementById("serviceToggle");
     const copyModeToggle = document.getElementById("copyModeToggle");
+    const themeToggle = document.getElementById("themeToggle");
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 
     function isSimpleMode() {
       return localStorage.getItem(COPY_MODE_KEY) === "simple";
@@ -771,6 +889,25 @@
       localStorage.setItem(COPY_MODE_KEY, simple ? "simple" : "original");
       syncCopyModeToggle();
       refreshActiveView();
+    }
+
+    function isDarkTheme() {
+      return document.documentElement.classList.contains("theme-dark");
+    }
+
+    function syncThemeToggle() {
+      const dark = isDarkTheme();
+      themeToggle.classList.toggle("is-on", dark);
+      themeToggle.setAttribute("aria-checked", dark ? "true" : "false");
+      if (themeColorMeta) {
+        themeColorMeta.setAttribute("content", dark ? "#1E2426" : "#FFBF2F");
+      }
+    }
+
+    function setDarkTheme(dark) {
+      document.documentElement.classList.toggle("theme-dark", dark);
+      localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
+      syncThemeToggle();
     }
 
     function refreshActiveView() {
@@ -882,6 +1019,12 @@
       setCopyMode(!isSimpleMode());
     };
     syncCopyModeToggle();
+
+    themeToggle.onclick = event => {
+      event.stopPropagation();
+      setDarkTheme(!isDarkTheme());
+    };
+    syncThemeToggle();
 
     function setShiftToolsVisible(visible) {
       topbarTools.classList.toggle("is-visible", visible);
@@ -1413,11 +1556,12 @@
           value="${escapeHtml(previous || "")}" placeholder="Например, 35">`;
       } else if (question.type === "select") {
         control = `
-          <div class="search-select" id="searchSelect">
+          <div class="search-select${previous ? " has-value" : ""}" id="searchSelect">
             <input type="hidden" id="answer" value="${escapeHtml(previous || "")}">
             <input type="text" id="citySearch" class="search-select-input" autocomplete="off"
               placeholder="Начните вводить город"
               value="${escapeHtml(previous || "")}">
+            <button type="button" class="search-select-clear" id="cityClear" title="Сбросить" aria-label="Сбросить выбор">${icon("close")}</button>
             <div class="search-select-list" id="cityList" hidden></div>
           </div>`;
       } else if (question.type === "textarea") {
@@ -1465,8 +1609,10 @@
     }
 
     function initCitySearchSelect(question) {
+      const root = document.getElementById("searchSelect");
       const hidden = document.getElementById("answer");
       const search = document.getElementById("citySearch");
+      const clear = document.getElementById("cityClear");
       const list = document.getElementById("cityList");
       const cities = question.options.map(optionLabel);
       let activeIndex = -1;
@@ -1477,6 +1623,11 @@
 
       function cityGate(city) {
         return resolveOptionGate(question, city);
+      }
+
+      function syncClearState() {
+        const hasValue = Boolean(hidden.value || search.value.trim());
+        root.classList.toggle("has-value", hasValue);
       }
 
       function filteredCities(query) {
@@ -1494,7 +1645,17 @@
       function selectCity(city) {
         hidden.value = city;
         search.value = city;
+        syncClearState();
         closeList();
+      }
+
+      function clearCity() {
+        hidden.value = "";
+        search.value = "";
+        syncClearState();
+        closeList();
+        search.focus();
+        renderList("");
       }
 
       function renderList(query) {
@@ -1534,10 +1695,17 @@
         });
       }
 
+      clear.addEventListener("mousedown", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        clearCity();
+      });
+
       search.addEventListener("focus", () => renderList(search.value));
       search.addEventListener("input", () => {
         const match = cities.find(city => city.toLowerCase() === search.value.trim().toLowerCase());
         hidden.value = match || "";
+        syncClearState();
         renderList(search.value);
       });
       search.addEventListener("keydown", event => {
@@ -1572,6 +1740,7 @@
         setTimeout(closeList, 120);
       });
 
+      syncClearState();
       search.focus();
       search.select();
     }
