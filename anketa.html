@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#FFBF2F">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFBF2F">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1E2426">
   <meta name="description" content="Офлайн-скринер для отбора участников исследования Лемана ПРО.">
   <meta name="application-name" content="Скринер Лемана ПРО">
   <title>Лемана ПРО · Скринер респондентов</title>
@@ -11,13 +12,6 @@
   <link rel="icon" href="favicon-32.png?v=2" type="image/png" sizes="32x32">
   <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2" sizes="180x180">
-  <script>
-    try {
-      if (localStorage.getItem("lemana_screener_theme") === "dark") {
-        document.documentElement.classList.add("theme-dark");
-      }
-    } catch (_) {}
-  </script>
   <style>
     :root {
       --brand: #FFBF2F;
@@ -53,44 +47,48 @@
       --radius: 8px;
       --radius-sm: 6px;
       --space: 12px;
-      --control-h: 42px;
+      --control-h: clamp(42px, 3.2vw, 48px);
+      --shell-max: 920px;
+      --shell-gutter: clamp(24px, 8vw, 120px);
+      --card-pad: clamp(16px, 2.4vw, 32px);
       --search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236A7377' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3-3'/%3E%3C/svg%3E");
-      color-scheme: light;
+      color-scheme: light dark;
     }
 
-    html.theme-dark {
-      --brand: #FFBF2F;
-      --brand-deep: #E0A84A;
-      --brand-soft: #3A3426;
-      --on-brand: #20282B;
-      --ink: #E4E8E9;
-      --muted: #9AA4A8;
-      --line: #3C4548;
-      --surface: #2A3134;
-      --background: #1E2426;
-      --danger: #E5736B;
-      --danger-bg: #3A2C2A;
-      --warning: #D6B15A;
-      --warning-bg: #3A3424;
-      --chip: #343C3F;
-      --chip-hover: #3E474A;
-      --hover: #323A3D;
-      --input-bg: #242B2E;
-      --control-muted: #343C3F;
-      --script-bg: #242B2E;
-      --progress-track: #343C3F;
-      --switch-off: #4A5356;
-      --option-line: #5A6366;
-      --option-hover-line: #6A7377;
-      --strong: #E4E8E9;
-      --on-strong: #1E2426;
-      --focus-ring: rgba(255, 191, 47, .22);
-      --edit-veil: rgba(255, 255, 255, .06);
-      --gate-pass: #6BC48A;
-      --gate-stop: #E5736B;
-      --gate-quota: #D6B15A;
-      --search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239AA4A8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3-3'/%3E%3C/svg%3E");
-      color-scheme: dark;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --brand: #FFBF2F;
+        --brand-deep: #E0A84A;
+        --brand-soft: #3A3426;
+        --on-brand: #20282B;
+        --ink: #E4E8E9;
+        --muted: #9AA4A8;
+        --line: #3C4548;
+        --surface: #2A3134;
+        --background: #1E2426;
+        --danger: #E5736B;
+        --danger-bg: #3A2C2A;
+        --warning: #D6B15A;
+        --warning-bg: #3A3424;
+        --chip: #343C3F;
+        --chip-hover: #3E474A;
+        --hover: #323A3D;
+        --input-bg: #242B2E;
+        --control-muted: #343C3F;
+        --script-bg: #242B2E;
+        --progress-track: #343C3F;
+        --switch-off: #4A5356;
+        --option-line: #5A6366;
+        --option-hover-line: #6A7377;
+        --strong: #E4E8E9;
+        --on-strong: #1E2426;
+        --focus-ring: rgba(255, 191, 47, .22);
+        --edit-veil: rgba(255, 255, 255, .06);
+        --gate-pass: #6BC48A;
+        --gate-stop: #E5736B;
+        --gate-quota: #D6B15A;
+        --search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239AA4A8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3-3'/%3E%3C/svg%3E");
+      }
     }
 
     * { box-sizing: border-box; }
@@ -101,7 +99,7 @@
       color: var(--ink);
       background: var(--background);
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      font-size: 15px;
+      font-size: clamp(15px, 1.15vw, 17px);
       line-height: 1.45;
       -webkit-font-smoothing: antialiased;
     }
@@ -109,17 +107,17 @@
     button, input, textarea, select { font: inherit; }
 
     .shell {
-      width: min(720px, calc(100% - 24px));
+      width: min(var(--shell-max), calc(100% - (var(--shell-gutter) * 2)));
       margin: 0 auto;
-      padding: 16px 0 28px;
+      padding: clamp(12px, 2vw, 28px) 0 clamp(24px, 4vw, 48px);
     }
 
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: clamp(10px, 2vw, 16px);
+      margin-bottom: clamp(12px, 1.8vw, 20px);
     }
 
     .brand {
@@ -128,24 +126,16 @@
       gap: 10px;
       min-width: 0;
       font-weight: 700;
-      font-size: 16px;
+      font-size: clamp(15px, 1.6vw, 18px);
       letter-spacing: -.01em;
     }
 
     .brand img {
       display: block;
       width: auto;
-      height: 28px;
+      height: clamp(26px, 3vw, 36px);
       flex: 0 0 auto;
     }
-
-    html.theme-dark .brand img {
-      padding: 5px 8px;
-      border-radius: 6px;
-      background: #F0F1F1;
-    }
-
-    .brand-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .saved-count {
       padding: 6px 10px;
@@ -323,16 +313,17 @@
     }
 
     .card {
-      padding: 18px 18px 16px;
+      padding: var(--card-pad);
+      padding-bottom: calc(var(--card-pad) - 2px);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: var(--surface);
     }
 
     h1, h2 { margin: 0 0 10px; line-height: 1.2; letter-spacing: -.02em; }
-    h1 { font-size: clamp(22px, 4vw, 28px); }
-    h2 { font-size: clamp(18px, 3.2vw, 22px); margin-bottom: 14px; }
-    h2.compact-title { font-size: clamp(16px, 2.8vw, 19px); line-height: 1.35; }
+    h1 { font-size: clamp(22px, 3.2vw, 34px); }
+    h2 { font-size: clamp(18px, 2.6vw, 26px); margin-bottom: clamp(12px, 1.6vw, 18px); }
+    h2.compact-title { font-size: clamp(16px, 2.2vw, 22px); line-height: 1.35; }
     p { margin: 0 0 10px; }
 
     .eyebrow {
@@ -344,15 +335,15 @@
       font-size: 11px;
     }
 
-    .lead { color: var(--muted); font-size: 15px; }
+    .lead { color: var(--muted); font-size: inherit; }
 
     .script {
-      margin: 14px 0;
-      padding: 14px 16px;
+      margin: clamp(12px, 1.8vw, 18px) 0;
+      padding: clamp(12px, 1.6vw, 18px) clamp(14px, 1.8vw, 20px);
       border-radius: var(--radius-sm);
       background: var(--script-bg);
       color: var(--ink);
-      font-size: 15px;
+      font-size: inherit;
       line-height: 1.5;
     }
 
@@ -412,8 +403,8 @@
       display: none;
       width: 100%;
       min-height: 168px;
-      max-height: min(52vh, 360px);
-      padding: 14px 48px 14px 16px;
+      max-height: min(58vh, 520px);
+      padding: clamp(12px, 1.6vw, 18px) 48px clamp(12px, 1.6vw, 18px) clamp(14px, 1.6vw, 18px);
       border: 0;
       border-radius: var(--radius-sm);
       outline: none;
@@ -535,7 +526,7 @@
       font-weight: 700;
     }
 
-    .options { display: grid; gap: 8px; }
+    .options { display: grid; gap: clamp(8px, 1vw, 12px); }
 
     .option {
       display: flex;
@@ -750,19 +741,6 @@
     .danger-btn:hover { filter: brightness(1.08); }
     .button:disabled { cursor: not-allowed; opacity: .45; transform: none; }
 
-    .result-icon {
-      display: grid;
-      width: 48px;
-      height: 48px;
-      margin-bottom: 12px;
-      place-items: center;
-      border-radius: 50%;
-      font-size: 22px;
-      font-weight: 800;
-    }
-
-    .success-icon { color: var(--on-brand); background: var(--brand); }
-    .stop-icon { color: var(--danger); background: var(--danger-bg); }
     .result-reason {
       padding: 10px 12px;
       border-radius: var(--radius-sm);
@@ -772,7 +750,10 @@
     .result-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 
     @media (max-width: 600px) {
-      .shell { width: min(100% - 16px, 720px); padding-top: 10px; }
+      .shell {
+        width: calc(100% - 40px);
+        padding-top: 10px;
+      }
       .topbar { align-items: flex-start; flex-wrap: wrap; }
       .brand { font-size: 14px; }
       .brand img { height: 24px; }
@@ -786,14 +767,28 @@
       .actions, .result-actions { flex-direction: column-reverse; }
       .button { width: 100%; }
     }
+
+    @media (min-width: 900px) {
+      .options { gap: 12px; }
+      .option, .button, .select-trigger, .searchable-select-input {
+        font-size: 16px;
+      }
+      .actions, .result-actions { gap: 12px; }
+    }
+
+    @media (min-width: 1200px) {
+      :root {
+        --shell-max: 960px;
+        --shell-gutter: clamp(48px, 12vw, 180px);
+      }
+    }
   </style>
 </head>
 <body>
   <main class="shell">
     <div class="topbar">
       <div class="brand">
-        <img src="lemana-logo.svg" alt="Лемана ПРО" width="120" height="31">
-        <span class="brand-title">Скринер</span>
+        <img src="lemana-logo.svg?v=2" alt="Лемана ПРО" width="120" height="31">
       </div>
       <div class="topbar-side">
         <div class="saved-count" id="savedCount" title="Данные хранятся только в браузере на этом компьютере">Сохранено анкет: 0</div>
@@ -805,10 +800,6 @@
               <button type="button" class="service-item" id="importFromStart" role="menuitem">Загрузить Excel</button>
               <button type="button" class="service-switch" id="copyModeToggle" role="menuitemcheckbox" aria-checked="false">
                 <span>Упрощённые текстовки</span>
-                <span class="switch-track" aria-hidden="true"></span>
-              </button>
-              <button type="button" class="service-switch" id="themeToggle" role="menuitemcheckbox" aria-checked="false">
-                <span>Тёмная тема</span>
                 <span class="switch-track" aria-hidden="true"></span>
               </button>
               <button type="button" class="service-item danger" id="resetShiftStart" role="menuitem">Очистка данных</button>
@@ -840,7 +831,6 @@
       arrowBack: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.7 5.3a1 1 0 0 1 0 1.4L7.4 11H19a1 1 0 1 1 0 2H7.4l4.3 4.3a1 1 0 0 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/></svg>',
       arrowRight: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.3 5.3a1 1 0 0 1 1.4 0l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4-1.4l4.3-4.3H5a1 1 0 1 1 0-2h11.6l-4.3-4.3a1 1 0 0 1 0-1.4Z"/></svg>',
       home: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.3 3.3a1 1 0 0 1 1.4 0l8 7.5a1 1 0 0 1-1.3 1.5L18 11.2V19a2 2 0 0 1-2 2h-2.5a1 1 0 0 1-1-1v-3.5h-3V20a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2v-7.8l-1.4 1.3a1 1 0 1 1-1.3-1.5l8-7.5Z"/></svg>',
-      refresh: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 5a7 7 0 0 1 6.1 3.5H16a1 1 0 1 0 0 2h4.5a1 1 0 0 0 1-1V5a1 1 0 1 0-2 0v1.2A9 9 0 1 0 21 12a1 1 0 1 0-2 0A7 7 0 1 1 12 5Z"/></svg>',
       pencil: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.6 4.4a2 2 0 0 1 2.8 0l1.2 1.2a2 2 0 0 1 0 2.8L9.1 19a1 1 0 0 1-.5.3l-4 1a1 1 0 0 1-1.2-1.2l1-4a1 1 0 0 1 .3-.5l10.5-10.5Zm1.4 1.4L7.5 15.3l-.4 1.6 1.6-.4 9.5-9.5-1.2-1.2Z"/></svg>',
     };
 
@@ -858,9 +848,9 @@
     document.getElementById("resetShiftStart").innerHTML = withIcon("trash", "Очистка данных");
 
     localStorage.removeItem("lemana_screener_surveys_v1");
+    localStorage.removeItem("lemana_screener_theme");
     const STORAGE_KEY = "lemana_screener_surveys_v2";
     const COPY_MODE_KEY = "lemana_screener_copy_mode";
-    const THEME_KEY = "lemana_screener_theme";
     const SCRIPT_SIMPLE_KEY = "lemana_screener_script_simple";
     const app = document.getElementById("app");
     const progressWrap = document.getElementById("progressWrap");
@@ -872,8 +862,6 @@
     const serviceMenu = document.getElementById("serviceMenu");
     const serviceToggle = document.getElementById("serviceToggle");
     const copyModeToggle = document.getElementById("copyModeToggle");
-    const themeToggle = document.getElementById("themeToggle");
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 
     function isSimpleMode() {
       return localStorage.getItem(COPY_MODE_KEY) === "simple";
@@ -891,31 +879,12 @@
       refreshActiveView();
     }
 
-    function isDarkTheme() {
-      return document.documentElement.classList.contains("theme-dark");
-    }
-
-    function syncThemeToggle() {
-      const dark = isDarkTheme();
-      themeToggle.classList.toggle("is-on", dark);
-      themeToggle.setAttribute("aria-checked", dark ? "true" : "false");
-      if (themeColorMeta) {
-        themeColorMeta.setAttribute("content", dark ? "#1E2426" : "#FFBF2F");
-      }
-    }
-
-    function setDarkTheme(dark) {
-      document.documentElement.classList.toggle("theme-dark", dark);
-      localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
-      syncThemeToggle();
-    }
-
     function refreshActiveView() {
       if (progressWrap.style.display === "block") {
         renderQuestion();
         return;
       }
-      if (app.querySelector(".result-icon")) return;
+      if (app.querySelector(".result-actions")) return;
       intro();
     }
 
@@ -955,7 +924,7 @@
       editor.style.height = "auto";
       const next = Math.min(
         Math.max(editor.scrollHeight, 168),
-        Math.min(window.innerHeight * 0.52, 360)
+        Math.min(window.innerHeight * 0.58, 520)
       );
       editor.style.height = next + "px";
     }
@@ -1019,12 +988,6 @@
       setCopyMode(!isSimpleMode());
     };
     syncCopyModeToggle();
-
-    themeToggle.onclick = event => {
-      event.stopPropagation();
-      setDarkTheme(!isDarkTheme());
-    };
-    syncThemeToggle();
 
     function setShiftToolsVisible(visible) {
       topbarTools.classList.toggle("is-visible", visible);
@@ -1386,21 +1349,27 @@
       ).length;
     }
 
-    function finalQuotaFailure() {
+    function quotaFailureFor(question, value) {
       if (isTestPhone(answers.phone)) return "";
+      if (value == null || value === "") return "";
 
+      if (question.quota && quotaCount(question.id, value) >= question.quota) {
+        return `Квота по городу «${value}» уже заполнена (${question.quota} из ${question.quota}).`;
+      }
+
+      const selectedOption = question.options?.find(option =>
+        typeof option === "object" && option.label === value
+      );
+      if (selectedOption?.quota && quotaCount(question.id, value) >= selectedOption.quota) {
+        return `Квота по выбранной категории уже заполнена (${selectedOption.quota} из ${selectedOption.quota}).`;
+      }
+      return "";
+    }
+
+    function finalQuotaFailure() {
       for (const question of questions) {
-        const value = answers[question.id];
-        if (question.quota && quotaCount(question.id, value) >= question.quota) {
-          return `Квота по городу «${value}» уже заполнена (${question.quota} из ${question.quota}).`;
-        }
-
-        const selectedOption = question.options?.find(option =>
-          typeof option === "object" && option.label === value
-        );
-        if (selectedOption?.quota && quotaCount(question.id, value) >= selectedOption.quota) {
-          return `Квота по выбранной категории уже заполнена (${selectedOption.quota} из ${selectedOption.quota}).`;
-        }
+        const reason = quotaFailureFor(question, answers[question.id]);
+        if (reason) return reason;
       }
       return "";
     }
@@ -1803,6 +1772,12 @@
         }
       }
 
+      const quotaFailureNow = quotaFailureFor(question, value);
+      if (quotaFailureNow) {
+        finish("Прервано", quotaFailureNow);
+        return;
+      }
+
       if (currentIndex < questions.length - 1) {
         currentIndex++;
         renderQuestion();
@@ -1837,14 +1812,13 @@
       setShiftToolsVisible(false);
       const success = status === "Подходит";
       app.innerHTML = `
-        <div class="result-icon ${success ? "success-icon" : "stop-icon"}">${success ? "✓" : "×"}</div>
         <div class="eyebrow">${success ? "Анкета завершена" : "Интервью прервано"}</div>
         <h1>${success ? "Респондент подходит" : "Отбор завершён"}</h1>
         <p class="result-reason">${escapeHtml(reason)}</p>
         ${isTest ? `<div class="instruction">Тестовая анкета — она не учитывается в общих квотах.</div>` : ""}
         <p>Ответы сохранены в браузере. Всего сохранено анкет: <strong>${surveys.length}</strong>.</p>
         <div class="result-actions">
-          <button class="button primary" id="newSurvey">${withIcon("refresh", "Начать заново")}</button>
+          <button class="button primary" id="newSurvey">Начать заново</button>
         </div>`;
 
       document.getElementById("newSurvey").onclick = intro;
