@@ -3,7 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Скринер — Лемана ПРО</title>
+  <meta name="theme-color" content="#FFBF2F">
+  <meta name="description" content="Офлайн-скринер для отбора участников исследования Лемана ПРО.">
+  <title>Скринер Лемана ПРО</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="favicon.svg">
   <style>
     :root {
       --brand: #FFBF2F;
@@ -77,10 +81,10 @@
 
     .saved-count {
       padding: 6px 10px;
-      border: 1px solid var(--line);
+      border: 0;
       border-radius: 999px;
       color: var(--muted);
-      background: var(--surface);
+      background: #EEF0F0;
       font-size: 12px;
       font-weight: 600;
       white-space: nowrap;
@@ -104,11 +108,11 @@
       align-items: center;
       gap: 6px;
       min-height: 34px;
-      padding: 6px 10px;
-      border: 1px solid var(--line);
+      padding: 6px 12px;
+      border: 0;
       border-radius: 999px;
       color: var(--ink);
-      background: var(--surface);
+      background: #EEF0F0;
       cursor: pointer;
       font-size: 13px;
       font-weight: 650;
@@ -116,18 +120,16 @@
 
     .service-toggle svg,
     .service-item svg,
-    .button .btn-ico,
-    .script-toggle .btn-ico {
+    .button .btn-ico {
       width: 18px;
       height: 18px;
-      flex: 0 0 auto;
+      flex: 0 0 18px;
     }
 
-    .service-item svg { opacity: .85; }
+    .service-item svg { opacity: .9; }
 
     .service-toggle:hover,
     .service-menu.is-open .service-toggle {
-      border-color: var(--brand-deep);
       background: var(--brand-soft);
     }
 
@@ -137,7 +139,7 @@
       top: calc(100% + 6px);
       right: 0;
       z-index: 20;
-      min-width: 220px;
+      min-width: 248px;
       padding: 4px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -150,7 +152,37 @@
     .service-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 10px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      color: var(--ink);
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .service-item .btn-ico,
+    .service-toggle .btn-ico {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      display: block;
+    }
+
+    .service-item:hover { background: var(--brand-soft); }
+    .service-item.danger { color: var(--danger); }
+    .service-item.danger:hover { background: var(--danger-bg); }
+
+    .service-switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       width: 100%;
       padding: 10px 10px;
       border: 0;
@@ -163,9 +195,38 @@
       font-weight: 600;
     }
 
-    .service-item:hover { background: var(--brand-soft); }
-    .service-item.danger { color: var(--danger); }
-    .service-item.danger:hover { background: var(--danger-bg); }
+    .service-switch:hover { background: var(--brand-soft); }
+
+    .switch-track {
+      position: relative;
+      width: 36px;
+      height: 22px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: #D5D9DA;
+      transition: background .15s ease;
+    }
+
+    .switch-track::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(32, 40, 43, .2);
+      transition: transform .15s ease;
+    }
+
+    .service-switch.is-on .switch-track {
+      background: var(--brand-deep);
+    }
+
+    .service-switch.is-on .switch-track::after {
+      transform: translateX(14px);
+    }
 
     .progress-wrap { display: none; margin-bottom: 10px; }
 
@@ -219,25 +280,87 @@
 
     .script {
       margin: 14px 0;
-      padding: 12px 14px;
-      border-left: 3px solid var(--brand);
-      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-      background: var(--brand-soft);
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      background: #F4F5F5;
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.5;
     }
 
-    .script p { margin: 0 0 8px; }
+    .script p { margin: 0 0 10px; }
     .script p:last-child { margin-bottom: 0; }
 
-    .script-reward {
-      margin-top: 10px !important;
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      color: var(--ink);
-      background: var(--brand);
-      font-weight: 750;
-      font-size: 15px;
+    .script-panel {
+      position: relative;
+      margin: 14px 0;
     }
 
+    .script-panel .script {
+      margin: 0;
+      padding-inline-end: 48px;
+    }
+
+    .script-edit-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      transition: background .15s, color .15s, transform .1s;
+    }
+
+    .script-edit-btn:hover {
+      color: var(--ink);
+      background: rgba(32, 40, 43, .06);
+    }
+
+    .script-edit-btn:active { transform: scale(0.96); }
+
+    .script-panel.is-editing .script-edit-btn {
+      color: var(--ink);
+      background: var(--brand);
+    }
+
+    .script-panel.is-editing .script-edit-btn:hover {
+      background: #F0B122;
+    }
+
+    .script-edit-btn .btn-ico {
+      width: 16px;
+      height: 16px;
+    }
+
+    .script-editor {
+      display: none;
+      width: 100%;
+      min-height: 168px;
+      max-height: min(52vh, 360px);
+      padding: 14px 48px 14px 16px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      outline: none;
+      color: var(--ink);
+      background: #F4F5F5;
+      resize: none;
+      overflow: auto;
+      font: inherit;
+      font-size: 15px;
+      line-height: 1.5;
+      box-shadow: inset 0 0 0 2px rgba(255, 191, 47, .55);
+    }
+
+    .script-panel.is-editing .script-view { display: none; }
+    .script-panel.is-editing .script-editor { display: block; }
 
     .btn-ico {
       width: 18px;
@@ -245,24 +368,6 @@
       flex: 0 0 auto;
       display: block;
     }
-
-    .script-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin: 8px 0 0;
-      padding: 0;
-      border: 0;
-      color: var(--brand-deep);
-      background: transparent;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 700;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    .script-toggle:hover { color: var(--ink); }
 
     .instruction {
       margin: -4px 0 12px;
@@ -377,16 +482,6 @@
 
     .option:hover { border-color: #C9CED0; background: #FAFAFA; }
 
-    .option.gate-pass,
-    .option.gate-stop,
-    .option.gate-quota {
-      box-shadow: inset 3px 0 0 var(--gate-edge, transparent);
-    }
-
-    .option.gate-pass { --gate-edge: var(--gate-pass); }
-    .option.gate-stop { --gate-edge: var(--gate-stop); }
-    .option.gate-quota { --gate-edge: var(--gate-quota); }
-
     .option:has(input:checked) {
       border-color: var(--brand-deep);
       background: var(--brand-soft);
@@ -395,8 +490,9 @@
     .option-body {
       display: flex;
       flex: 1;
-      flex-direction: column;
-      gap: 3px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       min-width: 0;
       line-height: 1.35;
     }
@@ -412,6 +508,7 @@
       font-weight: 500;
       font-variant-numeric: tabular-nums;
       line-height: 1.3;
+      cursor: help;
     }
 
     .option-meta svg {
@@ -420,46 +517,9 @@
       flex: 0 0 auto;
     }
 
-    .gate-pass > .option-body > .option-meta,
     .option-meta.is-pass { color: var(--gate-pass); }
-
-    .gate-stop > .option-body > .option-meta,
     .option-meta.is-stop { color: var(--gate-stop); }
-
-    .gate-quota > .option-body > .option-meta,
     .option-meta.is-quota { color: var(--gate-quota); }
-
-    .gate-legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      margin: 0 0 12px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    .gate-legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .gate-legend-item svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .gate-legend-item.is-pass { color: var(--gate-pass); }
-    .gate-legend-item.is-stop { color: var(--gate-stop); }
-    .gate-legend-item.is-quota { color: var(--gate-quota); }
-
-    .intro-hint {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
-    }
 
     .search-select {
       position: relative;
@@ -514,8 +574,6 @@
       font-weight: 600;
     }
 
-    .search-select-option.gate-pass { box-shadow: inset 3px 0 0 var(--gate-pass); }
-    .search-select-option.gate-quota { box-shadow: inset 3px 0 0 var(--gate-quota); }
     .search-select-option .option-meta { flex: 0 0 auto; white-space: nowrap; }
 
     .search-select-option:hover,
@@ -563,18 +621,18 @@
       gap: 8px;
       min-height: var(--control-h);
       padding: 10px 16px;
-      border: 1px solid transparent;
+      border: 0;
       border-radius: var(--radius-sm);
       cursor: pointer;
       font-weight: 700;
-      transition: background .15s, border-color .15s, opacity .15s, transform .1s;
+      transition: background .15s, opacity .15s, transform .1s;
     }
 
     .button:active { transform: scale(0.98); }
     .primary { color: var(--ink); background: var(--brand); }
     .primary:hover { background: #F0B122; }
-    .secondary { color: var(--ink); background: #fff; border-color: var(--line); }
-    .secondary:hover { background: #F7F8F8; }
+    .secondary { color: var(--ink); background: #EEF0F0; }
+    .secondary:hover { background: #E2E5E6; }
     .export { color: #fff; background: var(--ink); }
     .export:hover { background: #101416; }
     .danger-btn { color: #fff; background: var(--danger); }
@@ -602,13 +660,6 @@
     }
     .result-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 
-    .fineprint {
-      margin: 12px 2px 0;
-      color: var(--muted);
-      text-align: center;
-      font-size: 11px;
-    }
-
     @media (max-width: 600px) {
       .shell { width: min(100% - 16px, 720px); padding-top: 10px; }
       .topbar { align-items: flex-start; flex-wrap: wrap; }
@@ -634,13 +685,17 @@
         <span class="brand-title">Скринер</span>
       </div>
       <div class="topbar-side">
-        <div class="saved-count" id="savedCount">Сохранено анкет: 0</div>
+        <div class="saved-count" id="savedCount" title="Данные хранятся только в браузере на этом компьютере">Сохранено анкет: 0</div>
         <div class="topbar-tools" id="topbarTools">
           <div class="service-menu" id="serviceMenu">
             <button type="button" class="service-toggle" id="serviceToggle" aria-expanded="false" aria-haspopup="true">Сервис</button>
             <div class="service-dropdown" role="menu" id="serviceDropdown">
               <button type="button" class="service-item" id="exportFromStart" role="menuitem">Выгрузить в Excel</button>
               <button type="button" class="service-item" id="importFromStart" role="menuitem">Загрузить Excel</button>
+              <button type="button" class="service-switch" id="copyModeToggle" role="menuitemcheckbox" aria-checked="false">
+                <span>Упрощённые текстовки</span>
+                <span class="switch-track" aria-hidden="true"></span>
+              </button>
               <button type="button" class="service-item danger" id="resetShiftStart" role="menuitem">Очистка данных</button>
             </div>
           </div>
@@ -655,24 +710,23 @@
     </div>
 
     <section class="card" id="app"></section>
-    <div class="fineprint">Данные хранятся только в браузере на этом компьютере.</div>
   </main>
 
   <script>
     "use strict";
 
     const ICONS = {
-      settings: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path fill-rule="evenodd" clip-rule="evenodd" d="M3.9 15.6468L5.298 15.8608C6.33 16.0188 7.067 16.9428 6.991 17.9838L6.888 19.3948C6.858 19.8058 7.082 20.1928 7.453 20.3718L8.487 20.8698C8.858 21.0488 9.301 20.9818 9.604 20.7028L10.643 19.7428C11.409 19.0348 12.591 19.0348 13.358 19.7428L14.397 20.7028C14.7 20.9828 15.142 21.0488 15.514 20.8698L16.55 20.3708C16.92 20.1928 17.143 19.8068 17.113 19.3968L17.01 17.9838C16.934 16.9428 17.671 16.0188 18.703 15.8608L20.101 15.6468C20.508 15.5848 20.836 15.2798 20.928 14.8778L21.183 13.7598C21.275 13.3578 21.112 12.9408 20.772 12.7088L19.605 11.9098C18.744 11.3198 18.481 10.1678 19.001 9.26278L19.706 8.03678C19.911 7.67978 19.877 7.23278 19.62 6.91078L18.905 6.01378C18.648 5.69178 18.22 5.55878 17.826 5.67978L16.474 6.09378C15.475 6.39978 14.41 5.88678 14.026 4.91578L13.508 3.60278C13.356 3.21878 12.985 2.96678 12.572 2.96778L11.426 2.97078C11.013 2.97178 10.643 3.22578 10.493 3.61078L9.988 4.90878C9.608 5.88578 8.538 6.40278 7.536 6.09478L6.128 5.66278C5.733 5.54078 5.303 5.67478 5.046 5.99878L4.336 6.89678C4.079 7.22178 4.048 7.66978 4.257 8.02678L4.978 9.25578C5.509 10.1618 5.249 11.3248 4.383 11.9178L3.23 12.7078C2.89 12.9408 2.727 13.3578 2.819 13.7588L3.074 14.8768C3.165 15.2798 3.493 15.5848 3.9 15.6468V15.6468Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.916 10.0835C14.974 11.1415 14.974 12.8575 13.916 13.9155C12.858 14.9735 11.142 14.9735 10.084 13.9155C9.026 12.8575 9.026 11.1415 10.084 10.0835C11.142 9.02554 12.858 9.02554 13.916 10.0835" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      download: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path d="M3 15H7.382C7.761 15 8.107 15.214 8.276 15.553L8.723 16.447C8.893 16.786 9.239 17 9.618 17H14.382C14.761 17 15.107 16.786 15.276 16.447L15.723 15.553C15.893 15.214 16.239 15 16.618 15H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 3H19C20.105 3 21 3.895 21 5V19C21 20.105 20.105 21 19 21H5C3.895 21 3 20.105 3 19V5C3 3.895 3.895 3 5 3H7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.01 3V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.409 8.40906L12 12.0001L15.591 8.40906" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      upload: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path d="M20.4142 2.58579C21.1953 3.36684 21.1953 4.63317 20.4142 5.41422C19.6332 6.19527 18.3668 6.19527 17.5858 5.41422C16.8047 4.63317 16.8047 3.36684 17.5858 2.58579C18.3668 1.80474 19.6332 1.80474 20.4142 2.58579" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10V5C3 3.895 3.895 3 5 3H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 18V19C3 20.105 3.895 21 5 21H17C18.105 21 19 20.105 19 19V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 14H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.409 17.599L12 14.008L8.409 10.417" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      trash: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path d="M8 10H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path fill-rule="evenodd" clip-rule="evenodd" d="M15.331 20.9858H8.669C5.538 20.9858 3 18.4478 3 15.3168V8.65484C3 5.52384 5.538 2.98584 8.669 2.98584H15.33C18.462 2.98584 21 5.52384 21 8.65484V15.3158C21 18.4478 18.462 20.9858 15.331 20.9858Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 10V8.5C10 7.948 10.448 7.5 11 7.5H13C13.552 7.5 14 7.948 14 8.5V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.25 10V15.5C15.25 16.052 14.822 16.5 14.295 16.5H9.705C9.178 16.5 8.75 16.052 8.75 15.5V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      close: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path d="M8 14H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 17H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.25 7.5L10.75 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.25 10L10.75 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path fill-rule="evenodd" clip-rule="evenodd" d="M19 21H5C3.895 21 3 20.105 3 19V5C3 3.895 3.895 3 5 3H19C20.105 3 21 3.895 21 5V19C21 20.105 20.105 21 19 21Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      check: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path d="M7 7H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path fill-rule="evenodd" clip-rule="evenodd" d="M19 3.15601H5C3.895 3.15601 3 4.05101 3 5.15601V19C3 20.105 3.895 21 5 21H19C20.105 21 21 20.105 21 19V5.15601C21 4.05101 20.105 3.15601 19 3.15601Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.889 12.194L11.278 15.805L9.11099 13.638" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      arrowBack: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path d="M4.01 11.98H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.013 5.98804L4.002 12L10.013 18.012" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      arrowRight: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path d="M7.505 3L16.5 12.027L7.5 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      home: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path fill-rule="evenodd" clip-rule="evenodd" d="M3.734 9.764L12.002 3L20.267 9.764C20.731 10.143 21 10.712 21 11.311V19C21 20.105 20.105 21 19 21H5C3.895 21 3 20.105 3 19V11.312C3 10.712 3.269 10.143 3.734 9.764V9.764Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      refresh: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path d="M20.424 4.80322V7.69622H17.531H20.424" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.905 7.696C18.379 4.899 15.412 3 12 3C7.029 3 3 7.03 3 12C3 16.97 7.029 21 12 21C16.971 21 21 16.97 21 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.475 9.52476C15.842 10.8918 15.842 13.1078 14.475 14.4748C13.108 15.8418 10.892 15.8418 9.525 14.4748C8.158 13.1078 8.158 10.8918 9.525 9.52476C10.892 8.15776 13.108 8.15776 14.475 9.52476" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      text: '<svg class="btn-ico" viewBox="0 0 24 24" fill="none" ><path d="M9.95001 5H20.12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 17V5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 17V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      settings: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.64l-1.92-3.32a.49.49 0 0 0-.61-.22l-2.39.96c-.5-.38-1.05-.7-1.65-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.6.24-1.14.56-1.65.94l-2.39-.96a.49.49 0 0 0-.61.22L2.77 8.84a.49.49 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.89 14.5a.49.49 0 0 0-.12.64l1.92 3.32c.13.24.4.34.64.24l2.39-.96c.5.38 1.05.7 1.65.94l.36 2.54c.05.24.25.41.48.41h3.84c.23 0 .43-.17.48-.41l.36-2.54c.6-.24 1.14-.56 1.65-.94l2.39.96c.24.1.51 0 .64-.24l1.92-3.32a.49.49 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/></svg>',
+      download: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3a1 1 0 0 1 1 1v8.6l2.3-2.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L11 12.6V4a1 1 0 0 1 1-1Zm-6 14a1 1 0 0 1 1-1h10a1 1 0 1 1 0 2H7a1 1 0 0 1-1-1Z"/></svg>',
+      upload: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21a1 1 0 0 1-1-1v-8.6l-2.3 2.3a1 1 0 1 1-1.4-1.4l4-4a1 1 0 0 1 1.4 0l4 4a1 1 0 1 1-1.4 1.4L13 11.4V20a1 1 0 0 1-1 1ZM6 5a1 1 0 0 1 1-1h10a1 1 0 1 1 0 2H7a1 1 0 0 1-1-1Z"/></svg>',
+      trash: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h4a1 1 0 1 1 0 2h-1v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7H4a1 1 0 0 1 0-2h4V4Zm2 1v1h2V5h-2Zm-2 4a1 1 0 0 1 1 1v7a1 1 0 1 1-2 0v-7a1 1 0 0 1 1-1Zm5 0a1 1 0 0 1 1 1v7a1 1 0 1 1-2 0v-7a1 1 0 0 1 1-1Z"/></svg>',
+      close: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.3 6.3a1 1 0 0 1 1.4 0L12 10.6l4.3-4.3a1 1 0 1 1 1.4 1.4L13.4 12l4.3 4.3a1 1 0 0 1-1.4 1.4L12 13.4l-4.3 4.3a1 1 0 0 1-1.4-1.4L10.6 12 6.3 7.7a1 1 0 0 1 0-1.4Z"/></svg>',
+      check: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.7 15.3 18.1 6.9a1 1 0 1 1 1.4 1.4l-9.1 9.1a1 1 0 0 1-1.4 0L4.5 13a1 1 0 1 1 1.4-1.4l3.8 3.7Z"/></svg>',
+      arrowBack: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.7 5.3a1 1 0 0 1 0 1.4L7.4 11H19a1 1 0 1 1 0 2H7.4l4.3 4.3a1 1 0 0 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/></svg>',
+      arrowRight: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.3 5.3a1 1 0 0 1 1.4 0l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4-1.4l4.3-4.3H5a1 1 0 1 1 0-2h11.6l-4.3-4.3a1 1 0 0 1 0-1.4Z"/></svg>',
+      home: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.3 3.3a1 1 0 0 1 1.4 0l8 7.5a1 1 0 0 1-1.3 1.5L18 11.2V19a2 2 0 0 1-2 2h-2.5a1 1 0 0 1-1-1v-3.5h-3V20a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2v-7.8l-1.4 1.3a1 1 0 1 1-1.3-1.5l8-7.5Z"/></svg>',
+      refresh: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 5a7 7 0 0 1 6.1 3.5H16a1 1 0 1 0 0 2h4.5a1 1 0 0 0 1-1V5a1 1 0 1 0-2 0v1.2A9 9 0 1 0 21 12a1 1 0 1 0-2 0A7 7 0 1 1 12 5Z"/></svg>',
+      pencil: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.6 4.4a2 2 0 0 1 2.8 0l1.2 1.2a2 2 0 0 1 0 2.8L9.1 19a1 1 0 0 1-.5.3l-4 1a1 1 0 0 1-1.2-1.2l1-4a1 1 0 0 1 .3-.5l10.5-10.5Zm1.4 1.4L7.5 15.3l-.4 1.6 1.6-.4 9.5-9.5-1.2-1.2Z"/></svg>',
     };
 
     function icon(name) {
@@ -690,6 +744,8 @@
 
     localStorage.removeItem("lemana_screener_surveys_v1");
     const STORAGE_KEY = "lemana_screener_surveys_v2";
+    const COPY_MODE_KEY = "lemana_screener_copy_mode";
+    const SCRIPT_SIMPLE_KEY = "lemana_screener_script_simple";
     const app = document.getElementById("app");
     const progressWrap = document.getElementById("progressWrap");
     const progressBar = document.getElementById("progressBar");
@@ -699,6 +755,73 @@
     const topbarTools = document.getElementById("topbarTools");
     const serviceMenu = document.getElementById("serviceMenu");
     const serviceToggle = document.getElementById("serviceToggle");
+    const copyModeToggle = document.getElementById("copyModeToggle");
+
+    function isSimpleMode() {
+      return localStorage.getItem(COPY_MODE_KEY) === "simple";
+    }
+
+    function syncCopyModeToggle() {
+      const simple = isSimpleMode();
+      copyModeToggle.classList.toggle("is-on", simple);
+      copyModeToggle.setAttribute("aria-checked", simple ? "true" : "false");
+    }
+
+    function setCopyMode(simple) {
+      localStorage.setItem(COPY_MODE_KEY, simple ? "simple" : "original");
+      syncCopyModeToggle();
+      refreshActiveView();
+    }
+
+    function refreshActiveView() {
+      if (progressWrap.style.display === "block") {
+        renderQuestion();
+        return;
+      }
+      if (app.querySelector(".result-icon")) return;
+      intro();
+    }
+
+    function qText(question, field) {
+      if (isSimpleMode()) {
+        const simpleKey = field + "Simple";
+        if (question[simpleKey]) return question[simpleKey];
+      }
+      return question[field] || "";
+    }
+
+    const DEFAULT_SCRIPT_SIMPLE =
+      "Здравствуйте, это «Лемана ПРО». Дорабатываем программу лояльности и хотим услышать ваше мнение. Тема - ремонт.\n\n" +
+      "Это не продажа: менеджеров не будет, нужна ваша оценка.\n\n" +
+      "Встреча онлайн в Zoom. За участие - 5000 баллов на карту лояльности.";
+
+    function getSimpleScriptText() {
+      const saved = localStorage.getItem(SCRIPT_SIMPLE_KEY);
+      if (saved == null) return DEFAULT_SCRIPT_SIMPLE;
+      return saved;
+    }
+
+    function saveSimpleScriptText(text) {
+      localStorage.setItem(SCRIPT_SIMPLE_KEY, String(text ?? ""));
+    }
+
+    function scriptTextToHtml(text) {
+      const normalized = String(text || "").replace(/\r\n/g, "\n").trim();
+      if (!normalized) return "<p></p>";
+      return normalized.split(/\n\s*\n/).map(block => {
+        const lines = escapeHtml(block.trim()).replace(/\n/g, "<br>");
+        return `<p>${lines}</p>`;
+      }).join("");
+    }
+
+    function fitScriptEditor(editor) {
+      editor.style.height = "auto";
+      const next = Math.min(
+        Math.max(editor.scrollHeight, 168),
+        Math.min(window.innerHeight * 0.52, 360)
+      );
+      editor.style.height = next + "px";
+    }
 
     function defaultExportFilename() {
       return "Анкеты_Лемана_" + new Date().toISOString().slice(0, 10);
@@ -754,6 +877,12 @@
       resetShift();
     };
 
+    copyModeToggle.onclick = event => {
+      event.stopPropagation();
+      setCopyMode(!isSimpleMode());
+    };
+    syncCopyModeToggle();
+
     function setShiftToolsVisible(visible) {
       topbarTools.classList.toggle("is-visible", visible);
       if (!visible) closeServiceMenu();
@@ -771,14 +900,17 @@
         title: "Возраст",
         type: "number",
         instruction: "Допустимый возраст — от 22 до 55 лет включительно.",
+        instructionSimple: "От 22 до 55 лет.",
         validate: value => Number.isInteger(Number(value)) && Number(value) >= 22 && Number(value) <= 55
           ? "" : "Возраст должен быть целым числом от 22 до 55."
       },
       {
         id: "city",
         title: "Укажите город, в котором Вы зарегистрированы",
+        titleSimple: "Город регистрации",
         type: "select",
         instruction: "Выберите город из списка. Квота — не более 4 подходящих анкет на каждый город.",
+        instructionSimple: "Из списка. До 4 подходящих анкет на город.",
         quota: 4,
         options: [
           "Москва",
@@ -796,6 +928,7 @@
       {
         id: "residence",
         title: "Давно ли Вы проживаете в данном городе?",
+        titleSimple: "Как давно живёте в этом городе?",
         type: "radio",
         options: ["Менее 1 года", "1–3 года", "Более 3 лет"],
         terminate: value => value === "Менее 1 года" ? "Проживает в городе менее одного года." : ""
@@ -803,6 +936,7 @@
       {
         id: "apartment",
         title: "Когда вы приобрели / получили квартиру, в которой делали ремонт?",
+        titleSimple: "Когда получили квартиру, где делали ремонт?",
         type: "radio",
         options: ["Менее 12 месяцев назад", "Более 12 месяцев назад"],
         terminate: value => value === "Более 12 месяцев назад" ? "Квартира приобретена более 12 месяцев назад." : ""
@@ -810,14 +944,33 @@
       {
         id: "repair",
         title: "Какое из следующих утверждений точнее всего описывает вашу текущую ситуацию с ремонтом?",
+        titleSimple: "Что сейчас с ремонтом?",
         type: "radio",
         options: [
-          "Я планирую начать комплексный ремонт в ближайший месяц",
-          "Я сейчас делаю мелкий косметический ремонт (переклеить обои, заменить розетки)",
-          "Я сейчас нахожусь в процессе комплексного / капитального ремонта своего жилья",
-          "Я полностью завершил(а) мелкий косметический ремонт",
-          "Я полностью завершил(а) комплексный ремонт, включая меблировку",
-          "Я полностью завершил(а) комплексный ремонт, сейчас в процессе меблировки"
+          {
+            label: "Я планирую начать комплексный ремонт в ближайший месяц",
+            labelSimple: "Планирую комплексный ремонт в ближайший месяц"
+          },
+          {
+            label: "Я сейчас делаю мелкий косметический ремонт (переклеить обои, заменить розетки)",
+            labelSimple: "Сейчас мелкий косметический (обои, розетки)"
+          },
+          {
+            label: "Я сейчас нахожусь в процессе комплексного / капитального ремонта своего жилья",
+            labelSimple: "Сейчас комплексный / капитальный ремонт"
+          },
+          {
+            label: "Я полностью завершил(а) мелкий косметический ремонт",
+            labelSimple: "Закончил мелкий косметический"
+          },
+          {
+            label: "Я полностью завершил(а) комплексный ремонт, включая меблировку",
+            labelSimple: "Закончил комплексный, включая мебель"
+          },
+          {
+            label: "Я полностью завершил(а) комплексный ремонт, сейчас в процессе меблировки",
+            labelSimple: "Закончил комплексный, сейчас меблирую"
+          }
         ],
         terminate: value => [
           "Я планирую начать комплексный ремонт в ближайший месяц",
@@ -829,12 +982,21 @@
       {
         id: "repairFor",
         title: "Для кого вы делали этот ремонт?",
+        titleSimple: "Для кого делали ремонт?",
         type: "radio",
         instruction: "Квоты: 7 человек — для себя / семьи; 3 человека — для аренды / продажи.",
+        instructionSimple: "Квоты: 7 - себе/семье, 3 - аренда/продажа.",
         options: [
-          { label: "Для себя / своей семьи", quota: 7 },
-          { label: "Для сдачи квартиры в аренду / на продажу (флиппинг)", quota: 3 },
-          "Это моя работа, я делаю ремонты на заказ клиентам"
+          { label: "Для себя / своей семьи", labelSimple: "Для себя / семьи", quota: 7 },
+          {
+            label: "Для сдачи квартиры в аренду / на продажу (флиппинг)",
+            labelSimple: "Под аренду / продажу (флиппинг)",
+            quota: 3
+          },
+          {
+            label: "Это моя работа, я делаю ремонты на заказ клиентам",
+            labelSimple: "Работа: ремонты на заказ"
+          }
         ],
         terminate: value => value === "Это моя работа, я делаю ремонты на заказ клиентам"
           ? "Респондент занимается ремонтами на заказ." : ""
@@ -842,26 +1004,47 @@
       {
         id: "decisions",
         title: "Кто принимал решения о дизайне, выборе материалов и подрядчиков?",
+        titleSimple: "Кто решал по дизайну, материалам и подрядчикам?",
         type: "radio",
         instruction: "Квоты: по 5 человек в каждой категории.",
+        instructionSimple: "Квоты: по 5 в каждой категории.",
         options: [
-          { label: "Принимал решение и делал всё полностью сам (с семьей)", quota: 5 },
-          { label: "Принимал решение совместно с привлеченным профи (дизайнером / прорабом)", quota: 5 }
+          {
+            label: "Принимал решение и делал всё полностью сам (с семьей)",
+            labelSimple: "Сам (с семьёй): решал и делал всё",
+            quota: 5
+          },
+          {
+            label: "Принимал решение совместно с привлеченным профи (дизайнером / прорабом)",
+            labelSimple: "Вместе с профи (дизайнер / прораб)",
+            quota: 5
+          }
         ]
       },
       {
         id: "stores",
         title: "В каких магазинах вы совершали покупки для текущего ремонта?",
+        titleSimple: "Где покупали для этого ремонта?",
         type: "checkbox",
         instruction: "Зачитайте список. Можно выбрать несколько вариантов. Если не выбрана «Лемана ПРО», интервью нужно закончить.",
+        instructionSimple: "Можно несколько. Без «Лемана ПРО» - отсев.",
         options: [
           "Петрович",
-          "Лемана ПРО (бывший Леруа Мерлен)",
-          "Лента Дом (бывший ОБИ)",
+          {
+            label: "Лемана ПРО (бывший Леруа Мерлен)",
+            labelSimple: "Лемана ПРО (бывш. Леруа Мерлен)"
+          },
+          {
+            label: "Лента Дом (бывший ОБИ)",
+            labelSimple: "Лента Дом (бывш. ОБИ)"
+          },
           "Максидом",
           "Бауцентр",
           "Строительные рынки",
-          "Маркетплейсы (Ozon, Wildberries, Яндекс.Маркет)"
+          {
+            label: "Маркетплейсы (Ozon, Wildberries, Яндекс.Маркет)",
+            labelSimple: "Маркетплейсы (Ozon, WB, Я.Маркет)"
+          }
         ],
         terminate: value => value.includes("Лемана ПРО (бывший Леруа Мерлен)")
           ? "" : "Респондент не совершал покупок в «Лемана ПРО» для текущего ремонта."
@@ -869,41 +1052,60 @@
       {
         id: "loyalty",
         title: "Есть ли у вас оформленная программа лояльности магазина «Лемана ПРО»?",
+        titleSimple: "Есть карта лояльности «Лемана ПРО»?",
         type: "radio",
         subtitle: "Скидочная или бонусная карта «Лемана ПРО» (ранее «Леруа Мерлен»).",
+        subtitleSimple: "Скидочная или бонусная (раньше «Леруа Мерлен»).",
         options: ["Да", "Нет"],
         terminate: value => value === "Нет" ? "У респондента нет программы лояльности «Лемана ПРО»." : ""
       },
       {
         id: "family",
         title: "Расскажите немного о вашей семье и о том, кто будет жить или уже живет в этой квартире",
+        titleSimple: "Кто живёт или будет жить в квартире?",
         type: "textarea",
-        subtitle: "Уточните: есть ли дети, планируются ли, один человек или пара."
+        subtitle: "Уточните: есть ли дети, планируются ли, один человек или пара.",
+        subtitleSimple: "Дети есть или планируются? Один или пара?"
       },
       {
         id: "purchaseStory",
         title: "Какова предыстория покупки этой квартиры? Что стало главным стимулом для приобретения?",
+        titleSimple: "Как купили квартиру? Что подтолкнуло?",
         type: "textarea",
-        subtitle: "Например: расширение из-за детей, переезд от родителей, надоело снимать, наследство или вложение денег."
+        subtitle: "Например: расширение из-за детей, переезд от родителей, надоело снимать, наследство или вложение денег.",
+        subtitleSimple: "Дети, съехали от родителей, надоело снимать, наследство, вложение."
       },
       {
         id: "initialCondition",
         title: "В каком состоянии была квартира в момент покупки и насколько серьезные работы пришлось проводить?",
+        titleSimple: "В каком виде купили и сколько пришлось переделывать?",
         type: "textarea",
-        subtitle: "Например: бетонная коробка, White Box, вторичка со старым ремонтом под переделку или квартира с отделкой."
+        subtitle: "Например: бетонная коробка, White Box, вторичка со старым ремонтом под переделку или квартира с отделкой.",
+        subtitleSimple: "Коробка, white box, старая вторичка или с отделкой."
       },
       {
         id: "callback",
         title: "Большое спасибо за информацию. Я передаю вашу анкету в отдел координации проекта. Сейчас коллеги обрабатывают все заявки и составляют итоговый график встреч. В случае подтверждения мы свяжемся с вами в ближайшее время, чтобы окончательно зафиксировать время интервью. Вы не против, если мы вам перезвоним?",
+        titleSimple: "Спасибо. Передаём анкету координаторам - они соберут график и перезвонят, если подтвердят. Можно перезвонить?",
         type: "radio",
         compactTitle: true,
-        options: ["Да, можно перезвонить", "Нет, не нужно перезванивать"]
+        options: [
+          {
+            label: "Да, можно перезвонить",
+            labelSimple: "Да, можно"
+          },
+          {
+            label: "Нет, не нужно перезванивать",
+            labelSimple: "Нет, не нужно"
+          }
+        ]
       },
       {
         id: "phone",
         title: "Телефон респондента",
         type: "phone",
         instruction: "Введите ровно 9 цифр после +7. Для тестовой анкеты введите «тест» или «test».",
+        instructionSimple: "9 цифр после +7. Тест: «тест» или «test».",
         validate: value => /^\d{9}$/.test(value) || ["тест", "test"].includes(value.toLowerCase())
           ? "" : "Введите 9 цифр после +7 либо слово «тест» / «test»."
       }
@@ -966,6 +1168,12 @@
       return typeof option === "string" ? option : option.label;
     }
 
+    function optionDisplay(option) {
+      if (!isSimpleMode()) return optionLabel(option);
+      if (typeof option === "string") return option;
+      return option.labelSimple || option.label;
+    }
+
     function resolveOptionGate(question, option) {
       const label = optionLabel(option);
       const optionQuota = typeof option === "object" ? option.quota : null;
@@ -974,29 +1182,30 @@
 
       if (question.type === "radio" && question.terminate) {
         const reason = question.terminate(label);
-        if (reason) return { kind: "stop", text: "отсев" };
+        if (reason) return { kind: "stop", title: "Отсев", count: "" };
       }
 
       if (question.type === "checkbox" && question.id === "stores") {
         if (label.includes("Лемана ПРО")) {
-          return { kind: "pass", text: "нужен для прохода" };
+          return { kind: "pass", title: "Нужен для прохода", count: "" };
         }
-        return { kind: "neutral", text: "" };
+        return { kind: "neutral", title: "", count: "" };
       }
 
       if (quotaLimit) {
         const used = quotaCount(question.id, label);
+        const count = `${used}/${quotaLimit}`;
         if (used >= quotaLimit) {
-          return { kind: "quota", text: `квота заполнена · ${used}/${quotaLimit}` };
+          return { kind: "quota", title: "Квота заполнена", count };
         }
-        return { kind: "pass", text: `проход · ${used}/${quotaLimit}` };
+        return { kind: "pass", title: "Проход", count };
       }
 
       if (question.type === "radio" && question.terminate) {
-        return { kind: "pass", text: "проход" };
+        return { kind: "pass", title: "Проход", count: "" };
       }
 
-      return { kind: "neutral", text: "" };
+      return { kind: "neutral", title: "", count: "" };
     }
 
     function gateIconSvg(kind) {
@@ -1013,28 +1222,12 @@
     }
 
     function gateMetaHtml(gate) {
-      if (!gate || gate.kind === "neutral" || !gate.text) return "";
-      return `<span class="option-meta is-${gate.kind}">${gateIconSvg(gate.kind)}<span>${escapeHtml(gate.text)}</span></span>`;
-    }
-
-    function gateLegendHtml(kinds) {
-      const items = [];
-      if (kinds.has("pass")) {
-        items.push(`<span class="gate-legend-item is-pass">${gateIconSvg("pass")}<span>проход</span></span>`);
-      }
-      if (kinds.has("stop")) {
-        items.push(`<span class="gate-legend-item is-stop">${gateIconSvg("stop")}<span>отсев</span></span>`);
-      }
-      if (kinds.has("quota")) {
-        items.push(`<span class="gate-legend-item is-quota">${gateIconSvg("quota")}<span>квота</span></span>`);
-      }
-      if (!items.length) return "";
-      return `<div class="gate-legend">${items.join("")}</div>`;
-    }
-
-    function gateClassName(gate) {
       if (!gate || gate.kind === "neutral") return "";
-      return " gate-" + gate.kind;
+      const tip = gate.count ? `${gate.title} · ${gate.count}` : gate.title;
+      const countHtml = gate.count
+        ? `<span>${escapeHtml(gate.count)}</span>`
+        : "";
+      return `<span class="option-meta is-${gate.kind}" title="${escapeHtml(tip)}">${gateIconSvg(gate.kind)}${countHtml}</span>`;
     }
 
     function isTestPhone(value) {
@@ -1076,38 +1269,90 @@
       const scriptFull = `
         <p>Здравствуйте, Вас беспокоит сотрудник компании «Лемана ПРО». Мы работаем над улучшением программы лояльности и проводим встречи с покупателями, чтобы честно обсудить, что нам стоит улучшить. Хотели бы пригласить Вас к обсуждению темы «Проведение ремонта».</p>
         <p>Это не коммерческое предложение. Менеджеры по продажам участвовать не будут — нам важно только ваше независимое мнение.</p>
-        <p>Встреча займет около одного часа онлайн в программе Zoom. За участие предусмотрено вознаграждение — 5000 баллов на вашу карту лояльности.</p>
+        <p>Встреча пройдёт онлайн в программе Zoom. За участие предусмотрено вознаграждение — 5000 баллов на вашу карту лояльности.</p>
       `;
-      const scriptShort = `
-        <p>Здравствуйте, это «Лемана ПРО». Мы дорабатываем программу лояльности и хотим услышать покупателей. Приглашаем поговорить о ремонте.</p>
-        <p>Это не продажа: менеджеров по продажам не будет, нужна только ваша оценка.</p>
-        <p>Встреча пройдёт онлайн в Zoom.</p>
-        <p class="script-reward">За участие начислим 5000 баллов на вашу карту лояльности.</p>
-      `;
+
+      const simple = isSimpleMode();
+      const lead = simple
+        ? "Зачитайте текст респонденту."
+        : "Перед началом зачитайте респонденту информацию об исследовании.";
+      const interest = simple
+        ? "Интересно поучаствовать?"
+        : "Вам было бы интересно поделиться опытом?";
+
+      const scriptText = getSimpleScriptText();
+      const scriptBlock = simple
+        ? `<div class="script-panel" id="scriptPanel">
+            <button type="button" class="script-edit-btn" id="scriptEditToggle" title="Редактировать" aria-label="Редактировать текст" aria-pressed="false">${icon("pencil")}</button>
+            <div class="script script-view" id="introScript">${scriptTextToHtml(scriptText)}</div>
+            <textarea class="script-editor" id="introScriptEdit" aria-label="Текст приветствия" hidden>${escapeHtml(scriptText)}</textarea>
+          </div>`
+        : `<div class="script" id="introScript">${scriptFull}</div>`;
 
       app.innerHTML = `
-        <div class="eyebrow">Анкета для отбора участников</div>
+        <div class="eyebrow">${simple ? "Отбор участников" : "Анкета для отбора участников"}</div>
         <h1>Проведение ремонта</h1>
-        <p class="lead">Перед началом зачитайте респонденту информацию об исследовании.</p>
-        <div class="script" id="introScript">${scriptFull}</div>
-        <button type="button" class="script-toggle" id="toggleScript">${withIcon("text", "Краткая версия текста")}</button>
-        <h2>Вам было бы интересно поделиться опытом?</h2>
+        <p class="lead">${lead}</p>
+        ${scriptBlock}
+        <h2>${interest}</h2>
         <div class="actions">
-          <button class="button secondary" id="declineIntro">${withIcon("close", "Нет")}</button>
-          <button class="button primary" id="startButton">${withIcon("arrowRight", "Да, начать анкету")}</button>
+          <button class="button secondary" id="declineIntro" title="Отсев">${withIcon("close", "Нет")}</button>
+          <button class="button primary" id="startButton" title="Проход к анкете">${withIcon("arrowRight", simple ? "Да, начать" : "Да, начать анкету")}</button>
         </div>
-        <p class="intro-hint">«Нет» — отсев · «Да» — проход к анкете</p>
       `;
 
-      let shortMode = false;
-      document.getElementById("toggleScript").onclick = () => {
-        shortMode = !shortMode;
-        document.getElementById("introScript").innerHTML = shortMode ? scriptShort : scriptFull;
-        document.getElementById("toggleScript").innerHTML = withIcon(
-          "text",
-          shortMode ? "Полная версия текста" : "Краткая версия текста"
-        );
-      };
+      if (simple) {
+        const panel = document.getElementById("scriptPanel");
+        const view = document.getElementById("introScript");
+        const editor = document.getElementById("introScriptEdit");
+        const toggle = document.getElementById("scriptEditToggle");
+        let saveTimer = 0;
+
+        const persist = () => saveSimpleScriptText(editor.value);
+
+        const closeEditor = () => {
+          window.clearTimeout(saveTimer);
+          persist();
+          view.innerHTML = scriptTextToHtml(editor.value);
+          panel.classList.remove("is-editing");
+          editor.hidden = true;
+          toggle.innerHTML = icon("pencil");
+          toggle.title = "Редактировать";
+          toggle.setAttribute("aria-label", "Редактировать текст");
+          toggle.setAttribute("aria-pressed", "false");
+        };
+
+        const openEditor = () => {
+          editor.value = getSimpleScriptText();
+          panel.classList.add("is-editing");
+          editor.hidden = false;
+          toggle.innerHTML = icon("check");
+          toggle.title = "Готово";
+          toggle.setAttribute("aria-label", "Сохранить и закрыть");
+          toggle.setAttribute("aria-pressed", "true");
+          fitScriptEditor(editor);
+          editor.focus();
+          editor.setSelectionRange(editor.value.length, editor.value.length);
+        };
+
+        toggle.onclick = () => {
+          if (panel.classList.contains("is-editing")) closeEditor();
+          else openEditor();
+        };
+
+        editor.addEventListener("input", () => {
+          fitScriptEditor(editor);
+          window.clearTimeout(saveTimer);
+          saveTimer = window.setTimeout(persist, 250);
+        });
+
+        editor.addEventListener("keydown", event => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            closeEditor();
+          }
+        });
+      }
 
       document.getElementById("startButton").onclick = startNew;
       document.getElementById("declineIntro").onclick = () => {
@@ -1139,8 +1384,7 @@
       if (question.type === "radio" || question.type === "checkbox") {
         const inputType = question.type;
         const gates = question.options.map(option => resolveOptionGate(question, option));
-        const kinds = new Set(gates.map(gate => gate.kind).filter(kind => kind !== "neutral"));
-        control = gateLegendHtml(kinds) +
+        control =
           `<div class="options">` + question.options.map((option, index) => {
           const label = optionLabel(option);
           const gate = gates[index];
@@ -1148,10 +1392,10 @@
             ? (Array.isArray(previous) && previous.includes(label))
             : previous === label;
           return `
-            <label class="option${gateClassName(gate)}">
+            <label class="option">
               <input type="${inputType}" name="answer" value="${escapeHtml(label)}" ${checked ? "checked" : ""}>
               <span class="option-body">
-                <span class="option-label">${escapeHtml(label)}</span>
+                <span class="option-label">${escapeHtml(optionDisplay(option))}</span>
                 ${gateMetaHtml(gate)}
               </span>
             </label>`;
@@ -1169,7 +1413,6 @@
           value="${escapeHtml(previous || "")}" placeholder="Например, 35">`;
       } else if (question.type === "select") {
         control = `
-          ${gateLegendHtml(new Set(["pass", "quota"]))}
           <div class="search-select" id="searchSelect">
             <input type="hidden" id="answer" value="${escapeHtml(previous || "")}">
             <input type="text" id="citySearch" class="search-select-input" autocomplete="off"
@@ -1185,10 +1428,10 @@
 
       app.innerHTML = `
         <div class="eyebrow">Вопрос ${currentIndex + 1}</div>
-        ${question.preface ? `<div class="script"><p>${escapeHtml(question.preface)}</p></div>` : ""}
-        <h2 class="${question.compactTitle ? "compact-title" : ""}">${escapeHtml(question.title)}</h2>
-        ${question.subtitle ? `<p class="lead">${escapeHtml(question.subtitle)}</p>` : ""}
-        ${question.instruction ? `<div class="instruction">${escapeHtml(question.instruction)}</div>` : ""}
+        ${qText(question, "preface") ? `<div class="script"><p>${escapeHtml(qText(question, "preface"))}</p></div>` : ""}
+        <h2 class="${question.compactTitle ? "compact-title" : ""}">${escapeHtml(qText(question, "title"))}</h2>
+        ${qText(question, "subtitle") ? `<p class="lead">${escapeHtml(qText(question, "subtitle"))}</p>` : ""}
+        ${qText(question, "instruction") ? `<div class="instruction">${escapeHtml(qText(question, "instruction"))}</div>` : ""}
         ${control}
         <div class="error" id="error" role="alert"></div>
         <div class="actions">
@@ -1229,8 +1472,7 @@
       let activeIndex = -1;
 
       function optionLabelText(city) {
-        const used = quotaCount(question.id, city);
-        return `${city} — ${used} из ${question.quota}`;
+        return city;
       }
 
       function cityGate(city) {
@@ -1269,7 +1511,7 @@
           const gate = cityGate(city);
           const button = document.createElement("button");
           button.type = "button";
-          button.className = "search-select-option" + gateClassName(gate);
+          button.className = "search-select-option";
           if (city === hidden.value) button.classList.add("is-selected");
           button.innerHTML = `<span>${escapeHtml(optionLabelText(city))}</span>${gateMetaHtml(gate)}`;
           button.dataset.value = city;
