@@ -1210,10 +1210,10 @@
         id: "phone",
         title: "Телефон респондента",
         type: "phone",
-        instruction: "Введите ровно 9 цифр после +7. Для тестовой анкеты введите «тест» или «test».",
-        instructionSimple: "9 цифр после +7. Тест: «тест» или «test».",
-        validate: value => /^\d{9}$/.test(value) || ["тест", "test"].includes(value.toLowerCase())
-          ? "" : "Введите 9 цифр после +7 либо слово «тест» / «test»."
+        instruction: "Введите ровно 10 цифр после +7. Для тестовой анкеты введите «тест» или «test».",
+        instructionSimple: "10 цифр после +7. Тест: «тест» или «test».",
+        validate: value => /^\d{10}$/.test(value) || ["тест", "test"].includes(value.toLowerCase())
+          ? "" : "Введите 10 цифр после +7 либо слово «тест» / «test»."
       }
     ];
 
@@ -1517,8 +1517,8 @@
           <label class="field-label" for="answer">Номер телефона</label>
           <div class="phone-row">
             <span class="phone-prefix">+7</span>
-            <input id="answer" type="text" maxlength="9" autocomplete="off"
-              value="${escapeHtml(previous || "")}" placeholder="999123456 или test">
+            <input id="answer" type="text" maxlength="10" autocomplete="off"
+              value="${escapeHtml(previous || "")}" placeholder="9991234567 или test">
           </div>`;
       } else if (question.type === "number") {
         control = `<input id="answer" type="number" min="22" max="55" step="1"
