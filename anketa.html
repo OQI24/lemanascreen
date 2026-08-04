@@ -47,10 +47,10 @@
       --radius: 8px;
       --radius-sm: 6px;
       --space: 12px;
-      --control-h: clamp(42px, 3.2vw, 48px);
-      --shell-max: 920px;
-      --shell-gutter: clamp(24px, 8vw, 120px);
-      --card-pad: clamp(16px, 2.4vw, 32px);
+      --control-h: 42px;
+      --shell-max: 720px;
+      --shell-gutter: clamp(20px, 6vw, 96px);
+      --card-pad: 18px;
       --search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236A7377' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3-3'/%3E%3C/svg%3E");
       color-scheme: light dark;
     }
@@ -99,7 +99,7 @@
       color: var(--ink);
       background: var(--background);
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      font-size: clamp(15px, 1.15vw, 17px);
+      font-size: 15px;
       line-height: 1.45;
       -webkit-font-smoothing: antialiased;
     }
@@ -109,15 +109,15 @@
     .shell {
       width: min(var(--shell-max), calc(100% - (var(--shell-gutter) * 2)));
       margin: 0 auto;
-      padding: clamp(12px, 2vw, 28px) 0 clamp(24px, 4vw, 48px);
+      padding: 16px 0 28px;
     }
 
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: clamp(10px, 2vw, 16px);
-      margin-bottom: clamp(12px, 1.8vw, 20px);
+      gap: 12px;
+      margin-bottom: 12px;
     }
 
     .brand {
@@ -126,14 +126,14 @@
       gap: 10px;
       min-width: 0;
       font-weight: 700;
-      font-size: clamp(15px, 1.6vw, 18px);
+      font-size: 16px;
       letter-spacing: -.01em;
     }
 
     .brand img {
       display: block;
       width: auto;
-      height: clamp(26px, 3vw, 36px);
+      height: 28px;
       flex: 0 0 auto;
     }
 
@@ -321,9 +321,9 @@
     }
 
     h1, h2 { margin: 0 0 10px; line-height: 1.2; letter-spacing: -.02em; }
-    h1 { font-size: clamp(22px, 3.2vw, 34px); }
-    h2 { font-size: clamp(18px, 2.6vw, 26px); margin-bottom: clamp(12px, 1.6vw, 18px); }
-    h2.compact-title { font-size: clamp(16px, 2.2vw, 22px); line-height: 1.35; }
+    h1 { font-size: clamp(22px, 4vw, 28px); }
+    h2 { font-size: clamp(18px, 3.2vw, 22px); margin-bottom: 14px; }
+    h2.compact-title { font-size: clamp(16px, 2.8vw, 19px); line-height: 1.35; }
     p { margin: 0 0 10px; }
 
     .eyebrow {
@@ -335,15 +335,15 @@
       font-size: 11px;
     }
 
-    .lead { color: var(--muted); font-size: inherit; }
+    .lead { color: var(--muted); font-size: 15px; }
 
     .script {
-      margin: clamp(12px, 1.8vw, 18px) 0;
-      padding: clamp(12px, 1.6vw, 18px) clamp(14px, 1.8vw, 20px);
+      margin: 14px 0;
+      padding: 14px 16px;
       border-radius: var(--radius-sm);
       background: var(--script-bg);
       color: var(--ink);
-      font-size: inherit;
+      font-size: 15px;
       line-height: 1.5;
     }
 
@@ -403,8 +403,8 @@
       display: none;
       width: 100%;
       min-height: 168px;
-      max-height: min(58vh, 520px);
-      padding: clamp(12px, 1.6vw, 18px) 48px clamp(12px, 1.6vw, 18px) clamp(14px, 1.6vw, 18px);
+      max-height: min(52vh, 360px);
+      padding: 14px 48px 14px 16px;
       border: 0;
       border-radius: var(--radius-sm);
       outline: none;
@@ -526,7 +526,7 @@
       font-weight: 700;
     }
 
-    .options { display: grid; gap: clamp(8px, 1vw, 12px); }
+    .options { display: grid; gap: 8px; }
 
     .option {
       display: flex;
@@ -751,7 +751,7 @@
 
     @media (max-width: 600px) {
       .shell {
-        width: calc(100% - 40px);
+        width: calc(100% - 32px);
         padding-top: 10px;
       }
       .topbar { align-items: flex-start; flex-wrap: wrap; }
@@ -768,18 +768,9 @@
       .button { width: 100%; }
     }
 
-    @media (min-width: 900px) {
-      .options { gap: 12px; }
-      .option, .button, .select-trigger, .searchable-select-input {
-        font-size: 16px;
-      }
-      .actions, .result-actions { gap: 12px; }
-    }
-
     @media (min-width: 1200px) {
       :root {
-        --shell-max: 960px;
-        --shell-gutter: clamp(48px, 12vw, 180px);
+        --shell-gutter: clamp(40px, 10vw, 140px);
       }
     }
   </style>
@@ -830,7 +821,7 @@
       check: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.7 15.3 18.1 6.9a1 1 0 1 1 1.4 1.4l-9.1 9.1a1 1 0 0 1-1.4 0L4.5 13a1 1 0 1 1 1.4-1.4l3.8 3.7Z"/></svg>',
       arrowBack: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.7 5.3a1 1 0 0 1 0 1.4L7.4 11H19a1 1 0 1 1 0 2H7.4l4.3 4.3a1 1 0 0 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/></svg>',
       arrowRight: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.3 5.3a1 1 0 0 1 1.4 0l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4-1.4l4.3-4.3H5a1 1 0 1 1 0-2h11.6l-4.3-4.3a1 1 0 0 1 0-1.4Z"/></svg>',
-      home: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.3 3.3a1 1 0 0 1 1.4 0l8 7.5a1 1 0 0 1-1.3 1.5L18 11.2V19a2 2 0 0 1-2 2h-2.5a1 1 0 0 1-1-1v-3.5h-3V20a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2v-7.8l-1.4 1.3a1 1 0 1 1-1.3-1.5l8-7.5Z"/></svg>',
+      home: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.734 9.764 12.002 3 20.267 9.764C20.731 10.143 21 10.712 21 11.311V19C21 20.105 20.105 21 19 21H5C3.895 21 3 20.105 3 19V11.312C3 10.712 3.269 10.143 3.734 9.764Z"/></svg>',
       pencil: '<svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.6 4.4a2 2 0 0 1 2.8 0l1.2 1.2a2 2 0 0 1 0 2.8L9.1 19a1 1 0 0 1-.5.3l-4 1a1 1 0 0 1-1.2-1.2l1-4a1 1 0 0 1 .3-.5l10.5-10.5Zm1.4 1.4L7.5 15.3l-.4 1.6 1.6-.4 9.5-9.5-1.2-1.2Z"/></svg>',
     };
 
@@ -924,7 +915,7 @@
       editor.style.height = "auto";
       const next = Math.min(
         Math.max(editor.scrollHeight, 168),
-        Math.min(window.innerHeight * 0.58, 520)
+        Math.min(window.innerHeight * 0.52, 360)
       );
       editor.style.height = next + "px";
     }
