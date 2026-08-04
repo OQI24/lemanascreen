@@ -4,3 +4,7 @@
 skills-lock.json
 *.log
 .venv/
+.vscode/
+
+# Excel databases / exports in project root (PII)
+/*.xlsx

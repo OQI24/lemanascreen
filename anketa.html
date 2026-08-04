@@ -793,7 +793,7 @@
                 <span>Упрощённые текстовки</span>
                 <span class="switch-track" aria-hidden="true"></span>
               </button>
-              <button type="button" class="service-item danger" id="resetShiftStart" role="menuitem">Очистка данных</button>
+              <button type="button" class="service-item danger" id="resetShiftStart" role="menuitem">Очистить данные анкет</button>
             </div>
           </div>
           <input type="file" id="importFileInput" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
@@ -836,7 +836,7 @@
     document.getElementById("serviceToggle").innerHTML = withIcon("settings", "Сервис");
     document.getElementById("exportFromStart").innerHTML = withIcon("download", "Выгрузить в Excel");
     document.getElementById("importFromStart").innerHTML = withIcon("upload", "Загрузить Excel");
-    document.getElementById("resetShiftStart").innerHTML = withIcon("trash", "Очистка данных");
+    document.getElementById("resetShiftStart").innerHTML = withIcon("trash", "Очистка данных анкет");
 
     localStorage.removeItem("lemana_screener_surveys_v1");
     localStorage.removeItem("lemana_screener_theme");
