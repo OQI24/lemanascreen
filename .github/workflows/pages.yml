@@ -29,12 +29,25 @@ jobs:
 
       - name: Prepare static site
         run: |
+          set -euo pipefail
           mkdir -p _site
+
+          # Корень сайта = приложение (и / и /anketa.html)
           cp anketa.html _site/index.html
           cp anketa.html _site/anketa.html
+          cp anketa.css _site/
+
           cp lemana-logo.svg _site/
           cp favicon.svg favicon.ico favicon-32.png favicon-48.png apple-touch-icon.png _site/
-          if [ -d assets ]; then cp -R assets _site/; fi
+
+          cp -R js _site/js
+          cp -R vendor _site/vendor
+
+          mkdir -p _site/assets
+          cp -R assets/fonts _site/assets/fonts
+          mkdir -p _site/assets/icons
+          # иконки-ассеты без служебного _preview
+          find assets/icons -maxdepth 1 -type f -name '*.svg' -exec cp {} _site/assets/icons/ \;
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
