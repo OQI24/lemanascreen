@@ -8,3 +8,6 @@ skills-lock.json
 
 # Excel databases / exports in project root (PII)
 /*.xlsx
+
+# Temporary Figma MCP dumps / icon previews
+assets/icons/_preview/
