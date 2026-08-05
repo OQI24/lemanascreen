@@ -777,6 +777,14 @@ textarea:focus {
 
 textarea { min-height: 6.875rem; resize: vertical; }
 
+.secondary-question {
+  display: block;
+  margin: 1rem 0 0.375rem;
+  color: var(--ink);
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+
 .phone-row {
   display: flex;
   align-items: center;

@@ -2,12 +2,19 @@
 
 export const questions = [
   {
-    id: "respondentName",
+    id: "phoneInitial",
     title: "Как я могу к вам обращаться?",
     titleSimple: "Как обращаться к респонденту?",
-    type: "text",
-    instruction: "Имя или удобное обращение.",
-    instructionSimple: "Имя или обращение."
+    type: "phone",
+    askName: true,
+    instruction: "В поле телефона можно ввести до 15 символов. Для тестовой анкеты введите «тест» или «test».",
+    instructionSimple: "Имя и телефон (до 15 символов). Тест: «тест» / «test».",
+    validate: value => {
+      const v = String(value || "").trim();
+      if (["тест", "test"].includes(v.toLowerCase())) return "";
+      if (v.length >= 1 && v.length <= 15) return "";
+      return "Введите телефон (до 15 символов) либо «тест» / «test».";
+    }
   },
   {
     id: "gender",
@@ -21,8 +28,14 @@ export const questions = [
     type: "number",
     instruction: "Допустимый возраст — от 22 до 55 лет включительно.",
     instructionSimple: "От 22 до 55 лет.",
-    validate: value => Number.isInteger(Number(value)) && Number(value) >= 22 && Number(value) <= 55
-      ? "" : "Возраст должен быть целым числом от 22 до 55."
+    validate: value => Number.isInteger(Number(value))
+      ? "" : "Возраст должен быть целым числом.",
+    terminate: value => {
+      const age = Number(value);
+      return age >= 22 && age <= 55
+        ? ""
+        : "Возраст вне допустимого диапазона 22–55 лет.";
+    }
   },
   {
     id: "city",
@@ -230,10 +243,12 @@ export const questions = [
   },
   {
     id: "phone",
-    title: "Телефон респондента",
+    title: "Повторно введите телефон респондента",
+    titleSimple: "Телефон ещё раз",
     type: "phone",
-    instruction: "В поле телефона можно ввести до 15 символов. Для тестовой анкеты введите «тест» или «test».",
-    instructionSimple: "До 15 символов. Тест: «тест» или «test».",
+    matchInitialPhone: true,
+    instruction: "Телефон должен совпадать с номером, указанным в начале анкеты.",
+    instructionSimple: "Должен совпасть с номером в начале.",
     validate: value => {
       const v = String(value || "").trim();
       if (["тест", "test"].includes(v.toLowerCase())) return "";

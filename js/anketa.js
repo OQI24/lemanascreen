@@ -15,8 +15,9 @@ localStorage.removeItem("lemana_screener_surveys_v1");
 localStorage.removeItem("lemana_screener_surveys_v2");
 localStorage.removeItem("lemana_screener_surveys_v3");
 localStorage.removeItem("lemana_screener_surveys_v4");
+localStorage.removeItem("lemana_screener_surveys_v5");
 localStorage.removeItem("lemana_screener_theme");
-const STORAGE_KEY = "lemana_screener_surveys_v5";
+const STORAGE_KEY = "lemana_screener_surveys_v6";
 const COPY_MODE_KEY = "lemana_screener_copy_mode";
 const SCRIPT_SIMPLE_KEY = "lemana_screener_script_simple";
 const CLIENT_DB_NAME = "lemana_screener_clients_v1";
@@ -693,8 +694,12 @@ function isTestPhone(value) {
   return ["тест", "test"].includes(String(value || "").trim().toLowerCase());
 }
 
+function normalizePhone(value) {
+  return isTestPhone(value) ? "__test__" : String(value || "").trim();
+}
+
 function isTestSurvey() {
-  return isTestPhone(answers.phone);
+  return isTestPhone(answers.phoneInitial) || isTestPhone(answers.phone);
 }
 
 function validatePhoneValue(value) {
@@ -707,7 +712,9 @@ function validatePhoneValue(value) {
 const RESPONDENT_NAME_COLUMN = "Как я могу к вам обращаться?";
 const PHONE_PRIMARY_COLUMN = "Телефон респондента (первичный ввод)";
 const PHONE_SECONDARY_COLUMN = "Телефон респондента (повторный ввод)";
-const exportQuestions = () => questions.filter(question => question.id !== "respondentName");
+const exportQuestions = () => questions.filter(question =>
+  question.id !== "respondentName" && question.id !== "phoneInitial"
+);
 
 function exportQuestionHeaders() {
   const headers = [PHONE_PRIMARY_COLUMN];
@@ -1014,7 +1021,7 @@ async function intro() {
 function applyPendingClientToAnswers({ clearPending = true } = {}) {
   if (!pendingClient) return;
   answers.clientId = pendingClient.id;
-  answers.phone = formatPhoneInput(pendingClient.phone);
+  answers.phoneInitial = formatPhoneInput(pendingClient.phone);
   const quotaCity = matchQuotaCity(pendingClient.city);
   if (quotaCity) answers.city = quotaCity;
   if (clearPending) pendingClient = null;
@@ -1031,7 +1038,7 @@ function startDecline() {
 function renderDeclinePhone() {
   progressWrap.style.display = "none";
   setShiftToolsVisible(false);
-  const previous = answers.phone || "";
+  const previous = answers.phoneInitial || answers.phone || "";
   const simple = isSimpleMode();
 
   app.innerHTML = `
@@ -1078,6 +1085,7 @@ function submitDeclinePhone() {
     error.textContent = message;
     return;
   }
+  answers.phoneInitial = value;
   answers.phone = value;
   if (pendingClient) {
     answers.clientId = pendingClient.id;
@@ -1131,11 +1139,15 @@ function renderQuestion() {
     }).join("") + `</div>`;
   } else if (question.type === "phone") {
     control = `
-      <label class="field-label" for="answer">Номер телефона</label>
+      ${question.askName ? `
+        <input id="respondentName" type="text" maxlength="100" autocomplete="off"
+          value="${escapeHtml(answers.respondentName || "")}" placeholder="Введите имя или удобное обращение">
+        <label class="field-label secondary-question" for="answer">Телефон респондента</label>
+      ` : `<label class="field-label" for="answer">Номер телефона</label>`}
       <input id="answer" type="text" maxlength="15" autocomplete="off"
         value="${escapeHtml(previous || "")}" placeholder="Введите телефон или test">`;
   } else if (question.type === "number") {
-    control = `<input id="answer" type="number" min="22" max="55" step="1"
+    control = `<input id="answer" type="number" step="1"
       value="${escapeHtml(previous || "")}" placeholder="Например, 35">`;
   } else if (question.type === "select") {
     control = `
@@ -1183,11 +1195,17 @@ function renderQuestion() {
   if (question.type === "select") {
     initCitySearchSelect(question);
   } else {
-    const textInput = document.getElementById("answer");
-    if (textInput) {
-      textInput.focus();
-      textInput.addEventListener("keydown", event => {
+    const answerInput = document.getElementById("answer");
+    const nameInput = document.getElementById("respondentName");
+    (nameInput || answerInput)?.focus();
+    if (answerInput) {
+      answerInput.addEventListener("keydown", event => {
         if (event.key === "Enter" && question.type !== "textarea") goNext();
+      });
+    }
+    if (nameInput) {
+      nameInput.addEventListener("keydown", event => {
+        if (event.key === "Enter") answerInput?.focus();
       });
     }
   }
@@ -1355,6 +1373,10 @@ function readAnswer(question) {
 function goBack() {
   const question = questions[currentIndex];
   answers[question.id] = readAnswer(question);
+  if (question.askName) {
+    const nameInput = document.getElementById("respondentName");
+    if (nameInput) answers.respondentName = nameInput.value.trim();
+  }
   if (currentIndex === 0) {
     intro();
   } else {
@@ -1368,6 +1390,15 @@ function goNext() {
   const value = readAnswer(question);
   const empty = Array.isArray(value) ? value.length === 0 : value === "";
   const error = document.getElementById("error");
+
+  if (question.askName) {
+    const respondentName = document.getElementById("respondentName")?.value.trim() || "";
+    if (!respondentName) {
+      error.textContent = "Укажите, как обращаться к респонденту.";
+      return;
+    }
+    answers.respondentName = respondentName;
+  }
 
   if (empty) {
     error.textContent = "Выберите или введите ответ.";
@@ -1388,6 +1419,11 @@ function goNext() {
       error.textContent = message;
       return;
     }
+  }
+
+  if (question.matchInitialPhone && normalizePhone(value) !== normalizePhone(answers.phoneInitial)) {
+    error.textContent = "Телефон не совпадает с номером, указанным в начале анкеты.";
+    return;
   }
 
   answers[question.id] = value;
@@ -1868,11 +1904,13 @@ function rowsToSurveys(matrix) {
     if (clientId) answers.clientId = clientId;
     for (const question of questions) {
       const column = question.exportTitle || question.title;
-      let raw = question.id === "respondentName"
-        ? (respondentName || get(column))
-        : get(column);
-      if (!raw && question.id === "phone") {
-        raw = readPhoneFromImport(get);
+      let raw = "";
+      if (question.id === "phoneInitial") {
+        raw = get(PHONE_PRIMARY_COLUMN);
+      } else if (question.id === "phone") {
+        raw = get(column) || readPhoneFromImport(get);
+      } else {
+        raw = get(column);
       }
       if (question.type === "checkbox") {
         answers[question.id] = raw
@@ -1886,8 +1924,9 @@ function rowsToSurveys(matrix) {
     if (!answers.phone) {
       answers.phone = readPhoneFromImport(get);
     }
-    const phoneInitial = get(PHONE_PRIMARY_COLUMN);
-    if (phoneInitial) answers.phoneInitial = phoneInitial;
+    if (!answers.phoneInitial) {
+      answers.phoneInitial = get(PHONE_PRIMARY_COLUMN) || answers.phone || "";
+    }
 
     const id = get("ID анкеты") || (crypto.randomUUID
       ? crypto.randomUUID()
@@ -1899,7 +1938,9 @@ function rowsToSurveys(matrix) {
       completedAt: parseExportDate(get("Завершение")),
       status: get("Статус") || "Прервано",
       reason: get("Причина завершения") || "",
-      isTest: get("Тестовая анкета") === "Да" || isTestPhone(answers.phone),
+      isTest: get("Тестовая анкета") === "Да"
+        || isTestPhone(answers.phoneInitial)
+        || isTestPhone(answers.phone),
       answers
     });
   }
