@@ -13,11 +13,13 @@ document.getElementById("resetShiftStart").innerHTML = withIcon("trash", "Очи
 
 localStorage.removeItem("lemana_screener_surveys_v1");
 localStorage.removeItem("lemana_screener_surveys_v2");
-localStorage.removeItem("lemana_screener_surveys_v3");
-localStorage.removeItem("lemana_screener_surveys_v4");
-localStorage.removeItem("lemana_screener_surveys_v5");
 localStorage.removeItem("lemana_screener_theme");
-const STORAGE_KEY = "lemana_screener_surveys_v6";
+const STORAGE_KEY = "lemana_screener_surveys_v5";
+const LEGACY_STORAGE_KEYS = [
+  "lemana_screener_surveys_v6",
+  "lemana_screener_surveys_v4",
+  "lemana_screener_surveys_v3"
+];
 const COPY_MODE_KEY = "lemana_screener_copy_mode";
 const SCRIPT_SIMPLE_KEY = "lemana_screener_script_simple";
 const CLIENT_DB_NAME = "lemana_screener_clients_v1";
@@ -573,13 +575,26 @@ function stopClientTimeTimer() {
   }
 }
 
-function loadSurveys() {
+function readSurveysFromKey(key) {
   try {
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    const data = JSON.parse(localStorage.getItem(key) || "[]");
     return Array.isArray(data) ? data : [];
   } catch (_) {
     return [];
   }
+}
+
+function loadSurveys() {
+  let data = readSurveysFromKey(STORAGE_KEY);
+  if (data.length) return data;
+
+  for (const key of LEGACY_STORAGE_KEYS) {
+    const fallback = readSurveysFromKey(key);
+    if (!fallback.length) continue;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fallback));
+    return fallback;
+  }
+  return [];
 }
 
 function saveSurveys(surveys) {
