@@ -12,8 +12,9 @@ document.getElementById("clearClientBaseBtn").innerHTML = icon("trash");
 document.getElementById("resetShiftStart").innerHTML = withIcon("trash", "Очистка данных анкет");
 
 localStorage.removeItem("lemana_screener_surveys_v1");
+localStorage.removeItem("lemana_screener_surveys_v2");
 localStorage.removeItem("lemana_screener_theme");
-const STORAGE_KEY = "lemana_screener_surveys_v2";
+const STORAGE_KEY = "lemana_screener_surveys_v3";
 const COPY_MODE_KEY = "lemana_screener_copy_mode";
 const SCRIPT_SIMPLE_KEY = "lemana_screener_script_simple";
 const CLIENT_DB_NAME = "lemana_screener_clients_v1";
@@ -680,6 +681,14 @@ function isTestPhone(value) {
   return ["тест", "test"].includes(String(value || "").trim().toLowerCase());
 }
 
+function normalizePhone(value) {
+  return isTestPhone(value) ? "__test__" : String(value || "").trim();
+}
+
+function isTestSurvey() {
+  return isTestPhone(answers.phoneInitial) || isTestPhone(answers.phone);
+}
+
 function quotaCount(questionId, value) {
   return loadSurveys().filter(item =>
     item.status === "Подходит" &&
@@ -690,7 +699,7 @@ function quotaCount(questionId, value) {
 }
 
 function quotaFailureFor(question, value) {
-  if (isTestPhone(answers.phone)) return "";
+  if (isTestSurvey()) return "";
   if (value == null || value === "") return "";
 
   if (question.quota && quotaCount(question.id, value) >= question.quota) {
@@ -962,7 +971,7 @@ function startNew() {
   answers = { interest: "Да" };
   if (pendingClient) {
     answers.clientId = pendingClient.id;
-    answers.phone = pendingClient.phone;
+    answers.phoneInitial = pendingClient.phone;
     const quotaCity = matchQuotaCity(pendingClient.city);
     if (quotaCity) answers.city = quotaCity;
     pendingClient = null;
@@ -1264,6 +1273,11 @@ function goNext() {
     }
   }
 
+  if (question.matchInitialPhone && normalizePhone(value) !== normalizePhone(answers.phoneInitial)) {
+    error.textContent = "Телефон не совпадает с номером, указанным в начале анкеты.";
+    return;
+  }
+
   answers[question.id] = value;
 
   if (question.terminate) {
@@ -1295,7 +1309,7 @@ function goNext() {
 
 function persistCurrentSurvey(status, reason) {
   const surveys = loadSurveys();
-  const isTest = isTestPhone(answers.phone);
+  const isTest = isTestSurvey();
   const record = {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
     startedAt: startedAt || new Date().toISOString(),
@@ -1468,7 +1482,7 @@ function exportXlsx() {
   const headers = [
     "ID анкеты", "Начало", "Завершение", "Статус", "Причина завершения",
     "Тестовая анкета", "Интерес к участию", "ID клиента",
-    ...questions.map(question => question.title)
+    ...questions.map(question => question.exportTitle || question.title)
   ];
   const rows = [headers];
   for (const survey of surveys) {
@@ -1738,7 +1752,15 @@ function rowsToSurveys(matrix) {
     const clientId = get("ID клиента");
     if (clientId) answers.clientId = clientId;
     for (const question of questions) {
-      const raw = get(question.title);
+      const column = question.exportTitle || question.title;
+      let raw = get(column);
+      // Старый формат: одна колонка «Телефон респондента»
+      if (!raw && question.id === "phone") {
+        raw = get("Телефон респондента");
+      }
+      if (!raw && question.id === "phoneInitial") {
+        raw = get("Телефон респондента");
+      }
       if (question.type === "checkbox") {
         answers[question.id] = raw
           ? raw.split(/\s*;\s*/).map(part => part.trim()).filter(Boolean)
@@ -1758,7 +1780,9 @@ function rowsToSurveys(matrix) {
       completedAt: parseExportDate(get("Завершение")),
       status: get("Статус") || "Прервано",
       reason: get("Причина завершения") || "",
-      isTest: get("Тестовая анкета") === "Да" || isTestPhone(answers.phone),
+      isTest: get("Тестовая анкета") === "Да"
+        || isTestPhone(answers.phoneInitial)
+        || isTestPhone(answers.phone),
       answers
     });
   }
