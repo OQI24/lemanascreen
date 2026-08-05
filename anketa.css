@@ -513,7 +513,7 @@ p { margin: 0 0 0.625rem; }
 
 .script-panel .script {
   margin: 0;
-  padding-inline-end: 3rem;
+  padding-inline-end: calc(var(--touch) + 1rem);
 }
 
 .script-edit-btn {
@@ -1033,6 +1033,10 @@ textarea { min-height: 6.875rem; resize: vertical; }
   padding: 0.625rem 0.75rem;
   font-size: var(--fs-md);
   line-height: 1.4;
+}
+
+.card:has(#clientBasePanel) .script-panel .script {
+  padding: 0.625rem calc(var(--touch) + 1rem) 0.625rem 0.75rem;
 }
 
 .card:has(#clientBasePanel) .script p {
