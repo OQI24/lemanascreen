@@ -14,8 +14,9 @@ document.getElementById("resetShiftStart").innerHTML = withIcon("trash", "Очи
 localStorage.removeItem("lemana_screener_surveys_v1");
 localStorage.removeItem("lemana_screener_surveys_v2");
 localStorage.removeItem("lemana_screener_surveys_v3");
+localStorage.removeItem("lemana_screener_surveys_v4");
 localStorage.removeItem("lemana_screener_theme");
-const STORAGE_KEY = "lemana_screener_surveys_v4";
+const STORAGE_KEY = "lemana_screener_surveys_v5";
 const COPY_MODE_KEY = "lemana_screener_copy_mode";
 const SCRIPT_SIMPLE_KEY = "lemana_screener_script_simple";
 const CLIENT_DB_NAME = "lemana_screener_clients_v1";
@@ -110,6 +111,16 @@ function normalizeClientPhone(value) {
   if (digits.length === 11 && digits.startsWith("7")) return digits.slice(1);
   if (digits.length === 10) return digits;
   return digits;
+}
+
+/** Полный номер для поля ввода: +7XXXXXXXXXX (как в референсе, без отдельного префикса). */
+function formatPhoneInput(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw || isTestPhone(raw)) return raw;
+  const ten = normalizeClientPhone(raw);
+  if (ten.length === 10) return `+7${ten}`;
+  if (raw.startsWith("+")) return raw.slice(0, 15);
+  return raw.slice(0, 15);
 }
 
 function formatPhoneDisplay(phone10) {
@@ -687,9 +698,50 @@ function isTestSurvey() {
 }
 
 function validatePhoneValue(value) {
-  return /^\d{10}$/.test(value) || ["тест", "test"].includes(String(value || "").toLowerCase())
-    ? ""
-    : "Введите 10 цифр после +7 либо слово «тест» / «test».";
+  const v = String(value || "").trim();
+  if (isTestPhone(v)) return "";
+  if (v.length >= 1 && v.length <= 15) return "";
+  return "Введите телефон (до 15 символов) либо «тест» / «test».";
+}
+
+const RESPONDENT_NAME_COLUMN = "Как я могу к вам обращаться?";
+const PHONE_PRIMARY_COLUMN = "Телефон респондента (первичный ввод)";
+const PHONE_SECONDARY_COLUMN = "Телефон респондента (повторный ввод)";
+const exportQuestions = () => questions.filter(question => question.id !== "respondentName");
+
+function exportQuestionHeaders() {
+  const headers = [PHONE_PRIMARY_COLUMN];
+  for (const question of exportQuestions()) {
+    if (question.id === "phone") {
+      headers.push(PHONE_SECONDARY_COLUMN);
+      continue;
+    }
+    headers.push(question.exportTitle || question.title);
+  }
+  return headers;
+}
+
+function exportQuestionValues(answers) {
+  const phone = answers?.phone || answers?.phoneInitial || "";
+  // Двойной ввод в UI нет — в обе колонки пишем фактический номер (как в референсе по названиям).
+  const primary = answers?.phoneInitial || phone;
+  const secondary = answers?.phone || "";
+  const values = [primary];
+  for (const question of exportQuestions()) {
+    if (question.id === "phone") {
+      values.push(secondary || primary);
+      continue;
+    }
+    values.push(answers?.[question.id] ?? "");
+  }
+  return values;
+}
+
+function readPhoneFromImport(get) {
+  return get(PHONE_SECONDARY_COLUMN)
+    || get(PHONE_PRIMARY_COLUMN)
+    || get("Телефон респондента")
+    || "";
 }
 
 function quotaCount(questionId, value) {
@@ -962,7 +1014,7 @@ async function intro() {
 function applyPendingClientToAnswers({ clearPending = true } = {}) {
   if (!pendingClient) return;
   answers.clientId = pendingClient.id;
-  answers.phone = pendingClient.phone;
+  answers.phone = formatPhoneInput(pendingClient.phone);
   const quotaCity = matchQuotaCity(pendingClient.city);
   if (quotaCity) answers.city = quotaCity;
   if (clearPending) pendingClient = null;
@@ -987,15 +1039,12 @@ function renderDeclinePhone() {
     <h2>${simple ? "Телефон респондента" : "Укажите телефон респондента"}</h2>
     <div class="instruction">${
       simple
-        ? "10 цифр после +7. Нужен для учёта отказа."
-        : "Введите ровно 10 цифр после +7. Номер нужен, чтобы отказ тоже попал в выгрузку с контактом."
+        ? "До 15 символов. Нужен для учёта отказа."
+        : "В поле телефона можно ввести до 15 символов. Номер нужен, чтобы отказ тоже попал в выгрузку с контактом."
     }</div>
     <label class="field-label" for="answer">Номер телефона</label>
-    <div class="phone-row">
-      <span class="phone-prefix">+7</span>
-      <input id="answer" type="text" maxlength="10" autocomplete="off"
-        value="${escapeHtml(previous)}" placeholder="9991234567 или test">
-    </div>
+    <input id="answer" type="text" maxlength="15" autocomplete="off"
+      value="${escapeHtml(previous)}" placeholder="Введите телефон или test">
     <div class="error" id="error" role="alert"></div>
     <div class="actions">
       <button class="button secondary" id="backButton">${withIcon("home", "К началу")}</button>
@@ -1083,11 +1132,8 @@ function renderQuestion() {
   } else if (question.type === "phone") {
     control = `
       <label class="field-label" for="answer">Номер телефона</label>
-      <div class="phone-row">
-        <span class="phone-prefix">+7</span>
-        <input id="answer" type="text" maxlength="10" autocomplete="off"
-          value="${escapeHtml(previous || "")}" placeholder="9991234567 или test">
-      </div>`;
+      <input id="answer" type="text" maxlength="15" autocomplete="off"
+        value="${escapeHtml(previous || "")}" placeholder="Введите телефон или test">`;
   } else if (question.type === "number") {
     control = `<input id="answer" type="number" min="22" max="55" step="1"
       value="${escapeHtml(previous || "")}" placeholder="Например, 35">`;
@@ -1103,6 +1149,9 @@ function renderQuestion() {
       </div>`;
   } else if (question.type === "textarea") {
     control = `<textarea id="answer" placeholder="Введите ответ респондента">${escapeHtml(previous || "")}</textarea>`;
+  } else if (question.type === "text") {
+    control = `<input id="answer" type="text" maxlength="100" autocomplete="off"
+      value="${escapeHtml(previous || "")}" placeholder="Введите имя или удобное обращение">`;
   } else {
     control = `<input id="answer" type="text" value="${escapeHtml(previous || "")}" placeholder="Введите ответ">`;
   }
@@ -1544,8 +1593,8 @@ function exportXlsx() {
 
   const headers = [
     "ID анкеты", "Начало", "Завершение", "Статус", "Причина завершения",
-    "Тестовая анкета", "Интерес к участию", "ID клиента",
-    ...questions.map(question => question.exportTitle || question.title)
+    "Тестовая анкета", "Интерес к участию", RESPONDENT_NAME_COLUMN, "ID клиента",
+    ...exportQuestionHeaders()
   ];
   const rows = [headers];
   for (const survey of surveys) {
@@ -1557,8 +1606,9 @@ function exportXlsx() {
       survey.reason,
       survey.isTest ? "Да" : "Нет",
       survey.answers?.interest || "",
+      survey.answers?.respondentName || "",
       survey.answers?.clientId || "",
-      ...questions.map(question => survey.answers?.[question.id] ?? "")
+      ...exportQuestionValues(survey.answers)
     ]);
   }
 
@@ -1812,15 +1862,17 @@ function rowsToSurveys(matrix) {
     };
 
     const answers = { interest: get("Интерес к участию") };
+    const respondentName = get(RESPONDENT_NAME_COLUMN);
+    if (respondentName) answers.respondentName = respondentName;
     const clientId = get("ID клиента");
     if (clientId) answers.clientId = clientId;
     for (const question of questions) {
       const column = question.exportTitle || question.title;
-      let raw = get(column);
+      let raw = question.id === "respondentName"
+        ? (respondentName || get(column))
+        : get(column);
       if (!raw && question.id === "phone") {
-        raw = get("Телефон респондента")
-          || get("Телефон респондента (повторный ввод)")
-          || get("Телефон респондента (первичный ввод)");
+        raw = readPhoneFromImport(get);
       }
       if (question.type === "checkbox") {
         answers[question.id] = raw
@@ -1830,6 +1882,12 @@ function rowsToSurveys(matrix) {
         answers[question.id] = raw;
       }
     }
+
+    if (!answers.phone) {
+      answers.phone = readPhoneFromImport(get);
+    }
+    const phoneInitial = get(PHONE_PRIMARY_COLUMN);
+    if (phoneInitial) answers.phoneInitial = phoneInitial;
 
     const id = get("ID анкеты") || (crypto.randomUUID
       ? crypto.randomUUID()

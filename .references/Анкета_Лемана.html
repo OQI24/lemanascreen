@@ -158,6 +158,13 @@
       font-weight: 700;
     }
 
+    .secondary-question {
+      display: block;
+      margin: 24px 0 8px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
     input[type="text"],
     input[type="tel"],
     input[type="number"],
@@ -323,11 +330,11 @@
       {
         id: "phoneInitial",
         title: "Телефон респондента",
+        screenTitle: "Как я могу к вам обращаться?",
         exportTitle: "Телефон респондента (первичный ввод)",
         type: "phone",
-        instruction: "Введите ровно 10 цифр после +7. Для тестовой анкеты введите «тест» или «test».",
-        validate: value => /^\d{10}$/.test(value) || ["тест", "test"].includes(value.toLowerCase())
-          ? "" : "Введите 10 цифр после +7 либо слово «тест» / «test»."
+        askName: true,
+        instruction: "В поле телефона можно ввести до 15 символов. Для тестовой анкеты введите «тест» или «test»."
       },
       {
         id: "gender",
@@ -375,6 +382,12 @@
         type: "radio",
         options: ["Менее 12 месяцев назад", "Более 12 месяцев назад"],
         terminate: value => value === "Более 12 месяцев назад" ? "Квартира приобретена более 12 месяцев назад." : ""
+      },
+      {
+        id: "housingMarket",
+        title: "5.1. Вы купили эту квартиру в новостройке или на вторичном рынке?",
+        type: "radio",
+        options: ["Новостройка", "Вторичный рынок"]
       },
       {
         id: "repair",
@@ -474,9 +487,7 @@
         exportTitle: "Телефон респондента (повторный ввод)",
         type: "phone",
         matchInitialPhone: true,
-        instruction: "Телефон должен совпадать с номером, указанным в начале анкеты.",
-        validate: value => /^\d{10}$/.test(value) || ["тест", "test"].includes(value.toLowerCase())
-          ? "" : "Введите 10 цифр после +7 либо слово «тест» / «test»."
+        instruction: "Телефон должен совпадать с номером, указанным в начале анкеты."
       }
     ];
 
@@ -621,12 +632,13 @@
         }).join("") + `</div>`;
       } else if (question.type === "phone") {
         control = `
-          <label class="field-label" for="answer">Номер телефона</label>
-          <div class="phone-row">
-            <span class="phone-prefix">+7</span>
-            <input id="answer" type="text" maxlength="10" autocomplete="off"
-              value="${escapeHtml(previous || "")}" placeholder="9991234567 или test">
-          </div>`;
+          ${question.askName ? `
+            <input id="respondentName" type="text" maxlength="100" autocomplete="off"
+              value="${escapeHtml(answers.respondentName || "")}" placeholder="Введите имя или удобное обращение">
+            <label class="secondary-question" for="answer">Телефон респондента</label>
+          ` : `<label class="field-label" for="answer">Номер телефона</label>`}
+          <input id="answer" type="text" maxlength="15" autocomplete="off"
+            value="${escapeHtml(previous || "")}" placeholder="Введите телефон или test">`;
       } else if (question.type === "number") {
         control = `<input id="answer" type="number" min="22" max="55" step="1"
           value="${escapeHtml(previous || "")}" placeholder="Например, 35">`;
@@ -647,7 +659,7 @@
       app.innerHTML = `
         <div class="eyebrow">Вопрос ${currentIndex + 1}</div>
         ${question.preface ? `<div class="script"><p>${escapeHtml(question.preface)}</p></div>` : ""}
-        <h2 class="${question.compactTitle ? "compact-title" : ""}">${escapeHtml(question.title)}</h2>
+        <h2 class="${question.compactTitle ? "compact-title" : ""}">${escapeHtml(question.screenTitle || question.title)}</h2>
         ${question.subtitle ? `<p class="lead">${escapeHtml(question.subtitle)}</p>` : ""}
         ${question.instruction ? `<div class="instruction">${escapeHtml(question.instruction)}</div>` : ""}
         ${control}
@@ -660,11 +672,17 @@
       document.getElementById("backButton").onclick = goBack;
       document.getElementById("nextButton").onclick = goNext;
 
-      const textInput = document.getElementById("answer");
-      if (textInput) {
-        textInput.focus();
-        textInput.addEventListener("keydown", event => {
+      const answerInput = document.getElementById("answer");
+      const nameInput = document.getElementById("respondentName");
+      (nameInput || answerInput)?.focus();
+      if (answerInput) {
+        answerInput.addEventListener("keydown", event => {
           if (event.key === "Enter" && question.type !== "textarea") goNext();
+        });
+      }
+      if (nameInput) {
+        nameInput.addEventListener("keydown", event => {
+          if (event.key === "Enter") answerInput.focus();
         });
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -683,6 +701,9 @@
     function goBack() {
       const question = questions[currentIndex];
       answers[question.id] = readAnswer(question);
+      if (question.askName) {
+        answers.respondentName = document.getElementById("respondentName").value.trim();
+      }
       if (currentIndex === 0) {
         intro();
       } else {
@@ -696,6 +717,15 @@
       const value = readAnswer(question);
       const empty = Array.isArray(value) ? value.length === 0 : value === "";
       const error = document.getElementById("error");
+
+      if (question.askName) {
+        const respondentName = document.getElementById("respondentName").value.trim();
+        if (!respondentName) {
+          error.textContent = "Укажите, как обращаться к респонденту.";
+          return;
+        }
+        answers.respondentName = respondentName;
+      }
 
       if (empty) {
         error.textContent = "Выберите или введите ответ.";
@@ -906,7 +936,7 @@
 
       const headers = [
         "ID анкеты", "Начало", "Завершение", "Статус", "Причина завершения",
-        "Тестовая анкета", "Интерес к участию",
+        "Тестовая анкета", "Интерес к участию", "Как я могу к вам обращаться?",
         ...questions.map(question => question.exportTitle || question.title)
       ];
       const rows = [headers];
@@ -919,6 +949,7 @@
           survey.reason,
           survey.isTest ? "Да" : "Нет",
           survey.answers?.interest || "",
+          survey.answers?.respondentName || "",
           ...questions.map(question => survey.answers?.[question.id] ?? "")
         ]);
       }

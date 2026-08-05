@@ -2,6 +2,14 @@
 
 export const questions = [
   {
+    id: "respondentName",
+    title: "Как я могу к вам обращаться?",
+    titleSimple: "Как обращаться к респонденту?",
+    type: "text",
+    instruction: "Имя или удобное обращение.",
+    instructionSimple: "Имя или обращение."
+  },
+  {
     id: "gender",
     title: "Пол",
     type: "radio",
@@ -52,6 +60,13 @@ export const questions = [
     type: "radio",
     options: ["Менее 12 месяцев назад", "Более 12 месяцев назад"],
     terminate: value => value === "Более 12 месяцев назад" ? "Квартира приобретена более 12 месяцев назад." : ""
+  },
+  {
+    id: "housingMarket",
+    title: "5.1. Вы купили эту квартиру в новостройке или на вторичном рынке?",
+    titleSimple: "Новостройка или вторичка?",
+    type: "radio",
+    options: ["Новостройка", "Вторичный рынок"]
   },
   {
     id: "repair",
@@ -217,10 +232,14 @@ export const questions = [
     id: "phone",
     title: "Телефон респондента",
     type: "phone",
-    instruction: "Введите ровно 10 цифр после +7. Для тестовой анкеты введите «тест» или «test».",
-    instructionSimple: "10 цифр после +7. Тест: «тест» или «test».",
-    validate: value => /^\d{10}$/.test(value) || ["тест", "test"].includes(value.toLowerCase())
-      ? "" : "Введите 10 цифр после +7 либо слово «тест» / «test»."
+    instruction: "В поле телефона можно ввести до 15 символов. Для тестовой анкеты введите «тест» или «test».",
+    instructionSimple: "До 15 символов. Тест: «тест» или «test».",
+    validate: value => {
+      const v = String(value || "").trim();
+      if (["тест", "test"].includes(v.toLowerCase())) return "";
+      if (v.length >= 1 && v.length <= 15) return "";
+      return "Введите телефон (до 15 символов) либо «тест» / «test».";
+    }
   }
 ];
 
