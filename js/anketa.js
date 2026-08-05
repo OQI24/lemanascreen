@@ -13,8 +13,9 @@ document.getElementById("resetShiftStart").innerHTML = withIcon("trash", "Очи
 
 localStorage.removeItem("lemana_screener_surveys_v1");
 localStorage.removeItem("lemana_screener_surveys_v2");
+localStorage.removeItem("lemana_screener_surveys_v3");
 localStorage.removeItem("lemana_screener_theme");
-const STORAGE_KEY = "lemana_screener_surveys_v3";
+const STORAGE_KEY = "lemana_screener_surveys_v4";
 const COPY_MODE_KEY = "lemana_screener_copy_mode";
 const SCRIPT_SIMPLE_KEY = "lemana_screener_script_simple";
 const CLIENT_DB_NAME = "lemana_screener_clients_v1";
@@ -681,12 +682,14 @@ function isTestPhone(value) {
   return ["тест", "test"].includes(String(value || "").trim().toLowerCase());
 }
 
-function normalizePhone(value) {
-  return isTestPhone(value) ? "__test__" : String(value || "").trim();
+function isTestSurvey() {
+  return isTestPhone(answers.phone);
 }
 
-function isTestSurvey() {
-  return isTestPhone(answers.phoneInitial) || isTestPhone(answers.phone);
+function validatePhoneValue(value) {
+  return /^\d{10}$/.test(value) || ["тест", "test"].includes(String(value || "").toLowerCase())
+    ? ""
+    : "Введите 10 цифр после +7 либо слово «тест» / «test».";
 }
 
 function quotaCount(questionId, value) {
@@ -953,29 +956,92 @@ async function intro() {
   }
 
   document.getElementById("startButton").onclick = startNew;
-  document.getElementById("declineIntro").onclick = () => {
-    stopClientTimeTimer();
-    answers = { interest: "Нет" };
-    if (pendingClient) {
-      answers.clientId = pendingClient.id;
-      pendingClient = null;
-    }
-    startedAt = new Date().toISOString();
-    persistCurrentSurvey("Прервано", "Респондент не заинтересован в участии.");
+  document.getElementById("declineIntro").onclick = startDecline;
+}
+
+function applyPendingClientToAnswers({ clearPending = true } = {}) {
+  if (!pendingClient) return;
+  answers.clientId = pendingClient.id;
+  answers.phone = pendingClient.phone;
+  const quotaCity = matchQuotaCity(pendingClient.city);
+  if (quotaCity) answers.city = quotaCity;
+  if (clearPending) pendingClient = null;
+}
+
+function startDecline() {
+  stopClientTimeTimer();
+  answers = { interest: "Нет" };
+  applyPendingClientToAnswers({ clearPending: false });
+  startedAt = new Date().toISOString();
+  renderDeclinePhone();
+}
+
+function renderDeclinePhone() {
+  progressWrap.style.display = "none";
+  setShiftToolsVisible(false);
+  const previous = answers.phone || "";
+  const simple = isSimpleMode();
+
+  app.innerHTML = `
+    <div class="eyebrow">Отказ от участия</div>
+    <h2>${simple ? "Телефон респондента" : "Укажите телефон респондента"}</h2>
+    <div class="instruction">${
+      simple
+        ? "10 цифр после +7. Нужен для учёта отказа."
+        : "Введите ровно 10 цифр после +7. Номер нужен, чтобы отказ тоже попал в выгрузку с контактом."
+    }</div>
+    <label class="field-label" for="answer">Номер телефона</label>
+    <div class="phone-row">
+      <span class="phone-prefix">+7</span>
+      <input id="answer" type="text" maxlength="10" autocomplete="off"
+        value="${escapeHtml(previous)}" placeholder="9991234567 или test">
+    </div>
+    <div class="error" id="error" role="alert"></div>
+    <div class="actions">
+      <button class="button secondary" id="backButton">${withIcon("home", "К началу")}</button>
+      <button class="button primary" id="nextButton">${withIcon("check", "Сохранить отказ")}</button>
+    </div>`;
+
+  document.getElementById("backButton").onclick = () => {
+    answers = {};
+    startedAt = "";
     intro();
   };
+  document.getElementById("nextButton").onclick = submitDeclinePhone;
+
+  const textInput = document.getElementById("answer");
+  textInput.focus();
+  textInput.addEventListener("keydown", event => {
+    if (event.key === "Enter") submitDeclinePhone();
+  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function submitDeclinePhone() {
+  const value = document.getElementById("answer").value.trim();
+  const error = document.getElementById("error");
+  if (!value) {
+    error.textContent = "Введите телефон респондента.";
+    return;
+  }
+  const message = validatePhoneValue(value);
+  if (message) {
+    error.textContent = message;
+    return;
+  }
+  answers.phone = value;
+  if (pendingClient) {
+    answers.clientId = pendingClient.id;
+    pendingClient = null;
+  }
+  persistCurrentSurvey("Прервано", "Респондент не заинтересован в участии.");
+  intro();
 }
 
 function startNew() {
   stopClientTimeTimer();
   answers = { interest: "Да" };
-  if (pendingClient) {
-    answers.clientId = pendingClient.id;
-    answers.phoneInitial = pendingClient.phone;
-    const quotaCity = matchQuotaCity(pendingClient.city);
-    if (quotaCity) answers.city = quotaCity;
-    pendingClient = null;
-  }
+  applyPendingClientToAnswers();
   startedAt = new Date().toISOString();
   currentIndex = 0;
   renderQuestion();
@@ -991,7 +1057,9 @@ function renderQuestion() {
   progressBar.style.width = percent + "%";
 
   let control = "";
-  const previous = answers[question.id];
+  const previous = answers[question.id] !== undefined
+    ? answers[question.id]
+    : (question.defaultValue ?? "");
 
   if (question.type === "radio" || question.type === "checkbox") {
     const inputType = question.type;
@@ -1271,11 +1339,6 @@ function goNext() {
       error.textContent = message;
       return;
     }
-  }
-
-  if (question.matchInitialPhone && normalizePhone(value) !== normalizePhone(answers.phoneInitial)) {
-    error.textContent = "Телефон не совпадает с номером, указанным в начале анкеты.";
-    return;
   }
 
   answers[question.id] = value;
@@ -1754,12 +1817,10 @@ function rowsToSurveys(matrix) {
     for (const question of questions) {
       const column = question.exportTitle || question.title;
       let raw = get(column);
-      // Старый формат: одна колонка «Телефон респондента»
       if (!raw && question.id === "phone") {
-        raw = get("Телефон респондента");
-      }
-      if (!raw && question.id === "phoneInitial") {
-        raw = get("Телефон респондента");
+        raw = get("Телефон респондента")
+          || get("Телефон респондента (повторный ввод)")
+          || get("Телефон респондента (первичный ввод)");
       }
       if (question.type === "checkbox") {
         answers[question.id] = raw
@@ -1780,9 +1841,7 @@ function rowsToSurveys(matrix) {
       completedAt: parseExportDate(get("Завершение")),
       status: get("Статус") || "Прервано",
       reason: get("Причина завершения") || "",
-      isTest: get("Тестовая анкета") === "Да"
-        || isTestPhone(answers.phoneInitial)
-        || isTestPhone(answers.phone),
+      isTest: get("Тестовая анкета") === "Да" || isTestPhone(answers.phone),
       answers
     });
   }

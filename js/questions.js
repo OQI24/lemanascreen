@@ -2,17 +2,6 @@
 
 export const questions = [
   {
-    id: "phoneInitial",
-    title: "Телефон респондента",
-    exportTitle: "Телефон респондента (первичный ввод)",
-    titleSimple: "Телефон",
-    type: "phone",
-    instruction: "Введите ровно 10 цифр после +7. Для тестовой анкеты введите «тест» или «test».",
-    instructionSimple: "10 цифр после +7. Тест: «тест» или «test».",
-    validate: value => /^\d{10}$/.test(value) || ["тест", "test"].includes(value.toLowerCase())
-      ? "" : "Введите 10 цифр после +7 либо слово «тест» / «test»."
-  },
-  {
     id: "gender",
     title: "Пол",
     type: "radio",
@@ -180,6 +169,7 @@ export const questions = [
     subtitle: "Скидочная или бонусная карта «Лемана ПРО» (ранее «Леруа Мерлен»).",
     subtitleSimple: "Скидочная или бонусная (раньше «Леруа Мерлен»).",
     options: ["Да", "Нет"],
+    defaultValue: "Да",
     terminate: value => value === "Нет" ? "У респондента нет программы лояльности «Лемана ПРО»." : ""
   },
   {
@@ -225,13 +215,10 @@ export const questions = [
   },
   {
     id: "phone",
-    title: "Повторно введите телефон респондента",
-    exportTitle: "Телефон респондента (повторный ввод)",
-    titleSimple: "Телефон ещё раз",
+    title: "Телефон респондента",
     type: "phone",
-    matchInitialPhone: true,
-    instruction: "Телефон должен совпадать с номером, указанным в начале анкеты.",
-    instructionSimple: "Должен совпасть с номером в начале.",
+    instruction: "Введите ровно 10 цифр после +7. Для тестовой анкеты введите «тест» или «test».",
+    instructionSimple: "10 цифр после +7. Тест: «тест» или «test».",
     validate: value => /^\d{10}$/.test(value) || ["тест", "test"].includes(value.toLowerCase())
       ? "" : "Введите 10 цифр после +7 либо слово «тест» / «test»."
   }
