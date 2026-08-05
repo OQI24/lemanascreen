@@ -1021,7 +1021,9 @@ async function intro() {
 function applyPendingClientToAnswers({ clearPending = true } = {}) {
   if (!pendingClient) return;
   answers.clientId = pendingClient.id;
-  answers.phoneInitial = formatPhoneInput(pendingClient.phone);
+  const phone = formatPhoneInput(pendingClient.phone);
+  answers.phoneInitial = phone;
+  answers.phone = phone;
   const quotaCity = matchQuotaCity(pendingClient.city);
   if (quotaCity) answers.city = quotaCity;
   if (clearPending) pendingClient = null;
