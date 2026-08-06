@@ -39,6 +39,7 @@ const quotasToggle = document.getElementById("quotasToggle");
 const quotasPanel = document.getElementById("quotasPanel");
 const quotasPanelBody = document.getElementById("quotasPanelBody");
 const quotasPanelClose = document.getElementById("quotasPanelClose");
+const quotasScrim = document.getElementById("quotasScrim");
 const clientBaseFileInput = document.getElementById("clientBaseFileInput");
 
 quotasPanelClose.innerHTML = icon("close");
@@ -479,6 +480,8 @@ function renderQuotasPanel() {
 
 function setQuotasPanelOpen(open) {
   quotasPanel.hidden = !open;
+  quotasScrim.hidden = !open;
+  document.body.classList.toggle("quotas-open", open);
   if (open) renderQuotasPanel();
   syncQuotasToggle();
 }
@@ -653,6 +656,7 @@ quotasToggle.onclick = event => {
   setQuotasPanelOpen(!isQuotasPanelOpen());
 };
 quotasPanelClose.onclick = () => setQuotasPanelOpen(false);
+quotasScrim.onclick = () => setQuotasPanelOpen(false);
 syncQuotasToggle();
 
 function setShiftToolsVisible(visible) {
