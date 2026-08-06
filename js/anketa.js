@@ -409,14 +409,29 @@ function setCopyMode(simple) {
   if (isQuotasPanelOpen()) renderQuotasPanel();
 }
 
+let quotasPreferredOpen = false;
+
 function isQuotasPanelOpen() {
   return !quotasPanel.hidden;
 }
 
 function syncQuotasToggle() {
-  const open = isQuotasPanelOpen();
-  quotasToggle.classList.toggle("is-on", open);
-  quotasToggle.setAttribute("aria-checked", open ? "true" : "false");
+  quotasToggle.classList.toggle("is-on", quotasPreferredOpen);
+  quotasToggle.setAttribute("aria-checked", quotasPreferredOpen ? "true" : "false");
+}
+
+function applyQuotasPanelVisibility() {
+  const show = quotasPreferredOpen && topbarTools.classList.contains("is-visible");
+  quotasPanel.hidden = !show;
+  quotasScrim.hidden = !show;
+  document.body.classList.toggle("quotas-open", show);
+  if (show) renderQuotasPanel();
+  syncQuotasToggle();
+}
+
+function setQuotasPreferred(open) {
+  quotasPreferredOpen = Boolean(open);
+  applyQuotasPanelVisibility();
 }
 
 function shortSituationLabel(text) {
@@ -514,11 +529,7 @@ function renderQuotasPanel() {
 }
 
 function setQuotasPanelOpen(open) {
-  quotasPanel.hidden = !open;
-  quotasScrim.hidden = !open;
-  document.body.classList.toggle("quotas-open", open);
-  if (open) renderQuotasPanel();
-  syncQuotasToggle();
+  setQuotasPreferred(open);
 }
 
 function setAppHtml(html) {
@@ -689,18 +700,16 @@ syncCopyModeToggle();
 quotasToggle.onclick = event => {
   event.stopPropagation();
   if (!topbarTools.classList.contains("is-visible")) return;
-  setQuotasPanelOpen(!isQuotasPanelOpen());
+  setQuotasPreferred(!quotasPreferredOpen);
 };
-quotasPanelClose.onclick = () => setQuotasPanelOpen(false);
-quotasScrim.onclick = () => setQuotasPanelOpen(false);
+quotasPanelClose.onclick = () => setQuotasPreferred(false);
+quotasScrim.onclick = () => setQuotasPreferred(false);
 syncQuotasToggle();
 
 function setShiftToolsVisible(visible) {
   topbarTools.classList.toggle("is-visible", visible);
-  if (!visible) {
-    closeServiceMenu();
-    setQuotasPanelOpen(false);
-  }
+  if (!visible) closeServiceMenu();
+  applyQuotasPanelVisibility();
 }
 
 let currentIndex = 0;
