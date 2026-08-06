@@ -8,8 +8,6 @@ export const questions = [
     exportTitle: "Телефон респондента (первичный ввод)",
     type: "phone",
     askName: true,
-    instruction: "В поле телефона можно ввести до 15 символов. Для тестовой анкеты введите «тест» или «test».",
-    instructionSimple: "Имя и телефон (до 15 символов). Тест: «тест» / «test».",
     validate: value => {
       const v = String(value || "").trim();
       if (["тест", "test"].includes(v.toLowerCase())) return "";
@@ -43,8 +41,6 @@ export const questions = [
     title: "Укажите город, в котором Вы зарегистрированы",
     titleSimple: "Город регистрации",
     type: "select",
-    instruction: "Выберите город из списка. Квота — не более 4 подходящих анкет на каждый город.",
-    instructionSimple: "Из списка. До 4 подходящих анкет на город.",
     quota: 4,
     options: [
       "Москва",
@@ -125,8 +121,6 @@ export const questions = [
     title: "Для кого вы делали этот ремонт?",
     titleSimple: "Для кого делали ремонт?",
     type: "radio",
-    instruction: "Квоты: 7 человек — для себя / семьи; 3 человека — для аренды / продажи.",
-    instructionSimple: "Квоты: 7 - себе/семье, 3 - аренда/продажа.",
     options: [
       { label: "Для себя / своей семьи", labelSimple: "Для себя / семьи", quota: 7 },
       {
@@ -147,8 +141,6 @@ export const questions = [
     title: "Кто принимал решения о дизайне, выборе материалов и подрядчиков?",
     titleSimple: "Кто решал по дизайну, материалам и подрядчикам?",
     type: "radio",
-    instruction: "Квоты: по 5 человек в каждой категории.",
-    instructionSimple: "Квоты: по 5 в каждой категории.",
     options: [
       {
         label: "Принимал решение и делал всё полностью сам (с семьей)",
@@ -167,8 +159,6 @@ export const questions = [
     title: "В каких магазинах вы совершали покупки для текущего ремонта?",
     titleSimple: "Где покупали для этого ремонта?",
     type: "checkbox",
-    instruction: "Зачитайте список. Можно выбрать несколько вариантов. Если не выбрана «Лемана ПРО», интервью нужно закончить.",
-    instructionSimple: "Можно несколько. Без «Лемана ПРО» - отсев.",
     options: [
       "Петрович",
       {

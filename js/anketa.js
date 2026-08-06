@@ -30,11 +30,18 @@ const progressBar = document.getElementById("progressBar");
 const stepText = document.getElementById("stepText");
 const progressPercent = document.getElementById("progressPercent");
 const savedCount = document.getElementById("savedCount");
+const brandHome = document.getElementById("brandHome");
 const topbarTools = document.getElementById("topbarTools");
 const serviceMenu = document.getElementById("serviceMenu");
 const serviceToggle = document.getElementById("serviceToggle");
 const copyModeToggle = document.getElementById("copyModeToggle");
+const quotasToggle = document.getElementById("quotasToggle");
+const quotasPanel = document.getElementById("quotasPanel");
+const quotasPanelBody = document.getElementById("quotasPanelBody");
+const quotasPanelClose = document.getElementById("quotasPanelClose");
 const clientBaseFileInput = document.getElementById("clientBaseFileInput");
+
+quotasPanelClose.innerHTML = icon("close");
 
 function openClientDb() {
   return new Promise((resolve, reject) => {
@@ -398,6 +405,90 @@ function setCopyMode(simple) {
   localStorage.setItem(COPY_MODE_KEY, simple ? "simple" : "original");
   syncCopyModeToggle();
   refreshActiveView();
+  if (isQuotasPanelOpen()) renderQuotasPanel();
+}
+
+function isQuotasPanelOpen() {
+  return !quotasPanel.hidden;
+}
+
+function syncQuotasToggle() {
+  const open = isQuotasPanelOpen();
+  quotasToggle.classList.toggle("is-on", open);
+  quotasToggle.setAttribute("aria-checked", open ? "true" : "false");
+}
+
+function collectQuotaGroups() {
+  const groups = [];
+  for (const question of questions) {
+    const rows = [];
+    if (question.quota && Array.isArray(question.options)) {
+      for (const option of question.options) {
+        const value = optionLabel(option);
+        const used = quotaCount(question.id, value);
+        rows.push({
+          label: optionDisplay(option),
+          used,
+          limit: question.quota,
+          full: used >= question.quota
+        });
+      }
+    } else if (Array.isArray(question.options)) {
+      for (const option of question.options) {
+        if (typeof option !== "object" || !option.quota) continue;
+        const value = optionLabel(option);
+        const used = quotaCount(question.id, value);
+        rows.push({
+          label: optionDisplay(option),
+          used,
+          limit: option.quota,
+          full: used >= option.quota
+        });
+      }
+    }
+    if (!rows.length) continue;
+    groups.push({
+      title: qText(question, "title") || question.id,
+      rows
+    });
+  }
+  return groups;
+}
+
+function renderQuotasPanel() {
+  const groups = collectQuotaGroups();
+  if (!groups.length) {
+    quotasPanelBody.innerHTML = `<p class="quotas-empty">Квоты в анкете не заданы.</p>`;
+    return;
+  }
+  quotasPanelBody.innerHTML = groups.map(group => {
+    const rows = group.rows.map(row => `
+      <li class="quotas-row${row.full ? " is-full" : ""}">
+        <span class="quotas-row-label">${escapeHtml(row.label)}</span>
+        <span class="quotas-row-count">${row.used}/${row.limit}</span>
+      </li>
+    `).join("");
+    return `
+      <section class="quotas-group">
+        <h3 class="quotas-group-title">${escapeHtml(group.title)}</h3>
+        <ul class="quotas-list">${rows}</ul>
+      </section>
+    `;
+  }).join("");
+}
+
+function setQuotasPanelOpen(open) {
+  quotasPanel.hidden = !open;
+  if (open) renderQuotasPanel();
+  syncQuotasToggle();
+}
+
+function setAppHtml(html) {
+  app.classList.remove("is-step-enter");
+  app.innerHTML = html;
+  // Restart enter animation on every screen change (card node itself stays mounted).
+  void app.offsetWidth;
+  app.classList.add("is-step-enter");
 }
 
 function refreshActiveView() {
@@ -557,6 +648,13 @@ copyModeToggle.onclick = event => {
 };
 syncCopyModeToggle();
 
+quotasToggle.onclick = event => {
+  event.stopPropagation();
+  setQuotasPanelOpen(!isQuotasPanelOpen());
+};
+quotasPanelClose.onclick = () => setQuotasPanelOpen(false);
+syncQuotasToggle();
+
 function setShiftToolsVisible(visible) {
   topbarTools.classList.toggle("is-visible", visible);
   if (!visible) closeServiceMenu();
@@ -605,6 +703,7 @@ function saveSurveys(surveys) {
 function updateSavedCount() {
   const count = loadSurveys().length;
   savedCount.textContent = "Сохранено анкет: " + count;
+  if (isQuotasPanelOpen()) renderQuotasPanel();
 }
 
 function resetShift() {
@@ -825,7 +924,7 @@ async function intro() {
     </div>`
     : "";
 
-  app.innerHTML = `
+  setAppHtml(`
     <div class="eyebrow">${simple ? "Отбор участников" : "Анкета для отбора участников"}</div>
     ${clientLookupBlock}
     <p class="lead">${lead}</p>
@@ -835,7 +934,7 @@ async function intro() {
       <button class="button secondary" id="declineIntro" title="Пропустить">${withIcon("skip", "Нет")}</button>
       <button class="button primary" id="startButton" title="Проход к анкете">${withIcon("arrowRight", simple ? "Да, начать" : "Да, начать анкету")}</button>
     </div>
-  `;
+  `);
 
   const previewEl = document.getElementById("clientPreview");
   const idInput = document.getElementById("clientIdInput");
@@ -1031,7 +1130,7 @@ function renderDeclinePhone() {
   const previous = answers.phoneInitial || answers.phone || "";
   const simple = isSimpleMode();
 
-  app.innerHTML = `
+  setAppHtml(`
     <div class="eyebrow">Отказ от участия</div>
     <h2>${simple ? "Телефон респондента" : "Укажите телефон респондента"}</h2>
     <div class="instruction">${
@@ -1046,7 +1145,7 @@ function renderDeclinePhone() {
     <div class="actions">
       <button class="button secondary" id="backButton">${withIcon("home", "К началу")}</button>
       <button class="button primary" id="nextButton">${withIcon("check", "Сохранить отказ")}</button>
-    </div>`;
+    </div>`);
 
   document.getElementById("backButton").onclick = () => {
     answers = {};
@@ -1158,7 +1257,7 @@ function renderQuestion() {
     control = `<input id="answer" type="text" value="${escapeHtml(previous || "")}" placeholder="Введите ответ">`;
   }
 
-  app.innerHTML = `
+  setAppHtml(`
     <div class="eyebrow">Вопрос ${currentIndex + 1}</div>
     ${qText(question, "preface") ? `<div class="script"><p>${escapeHtml(qText(question, "preface"))}</p></div>` : ""}
     <h2 class="${question.compactTitle ? "compact-title" : ""}">${escapeHtml(qText(question, "title"))}</h2>
@@ -1177,7 +1276,7 @@ function renderQuestion() {
           ? withIcon("check", "Завершить")
           : withIcon("arrowRight", "Далее")
       }</button>
-    </div>`;
+    </div>`);
 
   document.getElementById("backButton").onclick = goBack;
   document.getElementById("nextButton").onclick = goNext;
@@ -1360,6 +1459,18 @@ function readAnswer(question) {
   return document.getElementById("answer").value.trim();
 }
 
+function goHome() {
+  answers = {};
+  startedAt = "";
+  currentIndex = 0;
+  pendingClient = null;
+  stopClientTimeTimer();
+  closeServiceMenu();
+  intro();
+}
+
+brandHome.onclick = () => goHome();
+
 function goBack() {
   const question = questions[currentIndex];
   answers[question.id] = readAnswer(question);
@@ -1470,7 +1581,7 @@ function finish(status, reason) {
   progressWrap.style.display = "none";
   setShiftToolsVisible(false);
   const success = status === "Подходит";
-  app.innerHTML = `
+  setAppHtml(`
     <div class="eyebrow">${success ? "Анкета завершена" : "Интервью прервано"}</div>
     <h1>${success ? "Респондент подходит" : "Отбор завершён"}</h1>
     <p class="result-reason">${escapeHtml(reason)}</p>
@@ -1478,7 +1589,7 @@ function finish(status, reason) {
     <p>Ответы сохранены в браузере. Всего сохранено анкет: <strong>${surveys.length}</strong>.</p>
     <div class="result-actions">
       <button class="button primary" id="newSurvey">Начать заново</button>
-    </div>`;
+    </div>`);
 
   document.getElementById("newSurvey").onclick = intro;
   window.scrollTo({ top: 0, behavior: "smooth" });
