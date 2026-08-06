@@ -727,36 +727,9 @@ function validatePhoneValue(value) {
 const RESPONDENT_NAME_COLUMN = "Как я могу к вам обращаться?";
 const PHONE_PRIMARY_COLUMN = "Телефон респондента (первичный ввод)";
 const PHONE_SECONDARY_COLUMN = "Телефон респондента (повторный ввод)";
-const exportQuestions = () => questions.filter(question =>
-  question.id !== "respondentName" && question.id !== "phoneInitial"
-);
 
-function exportQuestionHeaders() {
-  const headers = [PHONE_PRIMARY_COLUMN];
-  for (const question of exportQuestions()) {
-    if (question.id === "phone") {
-      headers.push(PHONE_SECONDARY_COLUMN);
-      continue;
-    }
-    headers.push(question.exportTitle || question.title);
-  }
-  return headers;
-}
-
-function exportQuestionValues(answers) {
-  const phone = answers?.phone || answers?.phoneInitial || "";
-  // Двойной ввод в UI нет — в обе колонки пишем фактический номер (как в референсе по названиям).
-  const primary = answers?.phoneInitial || phone;
-  const secondary = answers?.phone || "";
-  const values = [primary];
-  for (const question of exportQuestions()) {
-    if (question.id === "phone") {
-      values.push(secondary || primary);
-      continue;
-    }
-    values.push(answers?.[question.id] ?? "");
-  }
-  return values;
+function questionExportTitle(question) {
+  return question.exportTitle || question.title;
 }
 
 function readPhoneFromImport(get) {
@@ -1646,8 +1619,8 @@ function exportXlsx() {
 
   const headers = [
     "ID анкеты", "Начало", "Завершение", "Статус", "Причина завершения",
-    "Тестовая анкета", "Интерес к участию", RESPONDENT_NAME_COLUMN, "ID клиента",
-    ...exportQuestionHeaders()
+    "Тестовая анкета", "Интерес к участию", RESPONDENT_NAME_COLUMN,
+    ...questions.map(questionExportTitle)
   ];
   const rows = [headers];
   for (const survey of surveys) {
@@ -1660,8 +1633,7 @@ function exportXlsx() {
       survey.isTest ? "Да" : "Нет",
       survey.answers?.interest || "",
       survey.answers?.respondentName || "",
-      survey.answers?.clientId || "",
-      ...exportQuestionValues(survey.answers)
+      ...questions.map(question => survey.answers?.[question.id] ?? "")
     ]);
   }
 
@@ -1917,17 +1889,14 @@ function rowsToSurveys(matrix) {
     const answers = { interest: get("Интерес к участию") };
     const respondentName = get(RESPONDENT_NAME_COLUMN);
     if (respondentName) answers.respondentName = respondentName;
-    const clientId = get("ID клиента");
-    if (clientId) answers.clientId = clientId;
     for (const question of questions) {
-      const column = question.exportTitle || question.title;
-      let raw = "";
-      if (question.id === "phoneInitial") {
+      const column = questionExportTitle(question);
+      let raw = get(column);
+      if (!raw && question.id === "phoneInitial") {
         raw = get(PHONE_PRIMARY_COLUMN);
-      } else if (question.id === "phone") {
-        raw = get(column) || readPhoneFromImport(get);
-      } else {
-        raw = get(column);
+      }
+      if (!raw && question.id === "phone") {
+        raw = readPhoneFromImport(get);
       }
       if (question.type === "checkbox") {
         answers[question.id] = raw
@@ -1944,6 +1913,9 @@ function rowsToSurveys(matrix) {
     if (!answers.phoneInitial) {
       answers.phoneInitial = get(PHONE_PRIMARY_COLUMN) || answers.phone || "";
     }
+    // Старые выгрузки могли содержать ID клиента — подхватываем, в новую не пишем.
+    const clientId = get("ID клиента");
+    if (clientId) answers.clientId = clientId;
 
     const id = get("ID анкеты") || (crypto.randomUUID
       ? crypto.randomUUID()
