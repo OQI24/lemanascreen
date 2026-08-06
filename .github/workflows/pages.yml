@@ -6,25 +6,37 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
+# Важно: false — как в официальном шаблоне Pages.
+# true + ручная отмена mid-flight клинит очередь deploy-pages
+# (deployment_queued / сразу Deployment cancelled).
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
       - name: Prepare static site
         run: |
           set -euo pipefail
           mkdir -p _site
 
+          # Корень сайта = приложение (и / и /anketa.html)
           cp anketa.html _site/index.html
           cp anketa.html _site/anketa.html
           cp anketa.css _site/
@@ -38,14 +50,14 @@ jobs:
           mkdir -p _site/assets
           cp -R assets/fonts _site/assets/fonts
           mkdir -p _site/assets/icons
+          # иконки-ассеты без служебного _preview
           find assets/icons -maxdepth 1 -type f -name '*.svg' -exec cp {} _site/assets/icons/ \;
 
-      # actions/deploy-pages снова клинит в deployment_queued (таймаут 10 мин).
-      # Публикация в gh-pages стабильна; Pages читает эту ветку.
-      - name: Publish to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_site
-          force_orphan: true
-          commit_message: "Deploy ${{ github.sha }}"
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
