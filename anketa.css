@@ -732,6 +732,14 @@ p { margin: 0 0 0.625rem; max-width: 65ch; }
   font-weight: 600;
 }
 
+.instruction.italic-instruction {
+  padding: 0;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 400;
+  font-style: italic;
+}
+
 .field-label {
   display: block;
   margin-bottom: 0.375rem;
@@ -968,6 +976,20 @@ textarea { min-height: 6.875rem; resize: vertical; }
   border-color: color-mix(in srgb, var(--brand-deep) 70%, var(--line));
   background: var(--brand-soft);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 45%, transparent);
+}
+
+.option.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.option.is-disabled:hover {
+  border-color: var(--line);
+  background: transparent;
+}
+
+.option.is-disabled:active {
+  transform: none;
 }
 
 .option-body {
@@ -1298,9 +1320,19 @@ textarea { min-height: 6.875rem; resize: vertical; }
 }
 
 .quotas-row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
   min-width: 0;
   color: var(--ink);
   font-weight: 600;
+}
+
+.quotas-row-detail {
+  display: block;
+  color: var(--muted);
+  font-size: var(--fs-xs, 0.75rem);
+  font-weight: 500;
 }
 
 .quotas-row-count {

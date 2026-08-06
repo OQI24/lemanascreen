@@ -2,7 +2,7 @@
 
 import { icon, withIcon } from './icons.js';
 import { CITY_TZ_LOOKUP } from './cities.js';
-import { questions } from './questions.js';
+import { questions, PRESET_SITUATION_CITIES } from './questions.js';
 
 document.getElementById("serviceToggle").innerHTML = withIcon("settings", "Сервис");
 document.getElementById("exportFromStart").innerHTML = withIcon("download", "Выгрузить в Excel");
@@ -419,11 +419,44 @@ function syncQuotasToggle() {
   quotasToggle.setAttribute("aria-checked", open ? "true" : "false");
 }
 
+function shortSituationLabel(text) {
+  const head = String(text || "").split(".")[0].trim();
+  if (!head) return String(text || "");
+  return head.length > 72 ? head.slice(0, 69) + "…" : head;
+}
+
 function collectQuotaGroups() {
   const groups = [];
+
+  const cityRows = quotaCityOptions().map(city => {
+    const situation = cityQuotaSituation(city);
+    return {
+      label: city,
+      used: situation ? 1 : 0,
+      limit: 1,
+      full: Boolean(situation),
+      detail: situation ? shortSituationLabel(situation) : "свободно"
+    };
+  });
+  if (cityRows.length) {
+    groups.push({ title: "Город ↔ ситуация (1 на город)", rows: cityRows });
+  }
+
   for (const question of questions) {
     const rows = [];
-    if (question.quota && Array.isArray(question.options)) {
+    if (question.situationQuota && Array.isArray(question.options)) {
+      for (const option of question.options) {
+        const value = optionLabel(option);
+        const city = situationQuotaCity(value);
+        rows.push({
+          label: shortSituationLabel(value),
+          used: city ? 1 : 0,
+          limit: 1,
+          full: Boolean(city),
+          detail: city || "свободно"
+        });
+      }
+    } else if (question.quota && Array.isArray(question.options)) {
       for (const option of question.options) {
         const value = optionLabel(option);
         const used = quotaCount(question.id, value);
@@ -465,7 +498,9 @@ function renderQuotasPanel() {
   quotasPanelBody.innerHTML = groups.map(group => {
     const rows = group.rows.map(row => `
       <li class="quotas-row${row.full ? " is-full" : ""}">
-        <span class="quotas-row-label">${escapeHtml(row.label)}</span>
+        <span class="quotas-row-label">${escapeHtml(row.label)}${
+          row.detail ? `<small class="quotas-row-detail">${escapeHtml(row.detail)}</small>` : ""
+        }</span>
         <span class="quotas-row-count">${row.used}/${row.limit}</span>
       </li>
     `).join("");
@@ -653,6 +688,7 @@ syncCopyModeToggle();
 
 quotasToggle.onclick = event => {
   event.stopPropagation();
+  if (!topbarTools.classList.contains("is-visible")) return;
   setQuotasPanelOpen(!isQuotasPanelOpen());
 };
 quotasPanelClose.onclick = () => setQuotasPanelOpen(false);
@@ -661,7 +697,10 @@ syncQuotasToggle();
 
 function setShiftToolsVisible(visible) {
   topbarTools.classList.toggle("is-visible", visible);
-  if (!visible) closeServiceMenu();
+  if (!visible) {
+    closeServiceMenu();
+    setQuotasPanelOpen(false);
+  }
 }
 
 let currentIndex = 0;
@@ -770,6 +809,22 @@ function resolveOptionGate(question, option) {
     return { kind: "neutral", title: "", count: "" };
   }
 
+  if (question.situationQuota) {
+    const usedCity = situationQuotaCity(label);
+    if (usedCity) {
+      return { kind: "quota", title: `Квота закрыта — ${usedCity}`, count: "1/1" };
+    }
+    return { kind: "pass", title: "Проход", count: "0/1" };
+  }
+
+  if (question.id === "city") {
+    const situation = cityQuotaSituation(label);
+    if (situation) {
+      return { kind: "quota", title: "Квота закрыта", count: "1/1" };
+    }
+    return { kind: "pass", title: "Свободно", count: "0/1" };
+  }
+
   if (quotaLimit) {
     const used = quotaCount(question.id, label);
     const count = `${used}/${quotaLimit}`;
@@ -828,18 +883,9 @@ function validatePhoneValue(value) {
 }
 
 const RESPONDENT_NAME_COLUMN = "Как я могу к вам обращаться?";
-const PHONE_PRIMARY_COLUMN = "Телефон респондента (первичный ввод)";
-const PHONE_SECONDARY_COLUMN = "Телефон респондента (повторный ввод)";
 
 function questionExportTitle(question) {
   return question.exportTitle || question.title;
-}
-
-function readPhoneFromImport(get) {
-  return get(PHONE_SECONDARY_COLUMN)
-    || get(PHONE_PRIMARY_COLUMN)
-    || get("Телефон респондента")
-    || "";
 }
 
 function quotaCount(questionId, value) {
@@ -851,9 +897,52 @@ function quotaCount(questionId, value) {
   ).length;
 }
 
+function completedSituationSurveys() {
+  return loadSurveys().filter(item =>
+    item.status === "Подходит" &&
+    !item.isTest &&
+    item.answers?.city &&
+    item.answers?.purchaseSituation
+  );
+}
+
+function situationQuotaCity(situation) {
+  if (!situation) return "";
+  if (PRESET_SITUATION_CITIES[situation]) return PRESET_SITUATION_CITIES[situation];
+  return completedSituationSurveys().find(item =>
+    item.answers.purchaseSituation === situation
+  )?.answers.city || "";
+}
+
+function cityQuotaSituation(city) {
+  if (!city) return "";
+  const presetEntry = Object.entries(PRESET_SITUATION_CITIES).find(([, presetCity]) =>
+    presetCity === city
+  );
+  if (presetEntry) return presetEntry[0];
+  return completedSituationSurveys().find(item =>
+    item.answers.city === city
+  )?.answers.purchaseSituation || "";
+}
+
 function quotaFailureFor(question, value) {
   if (isTestSurvey()) return "";
   if (value == null || value === "") return "";
+
+  if (question.situationQuota) {
+    const situationCity = situationQuotaCity(value);
+    if (situationCity) {
+      return `Выбранная ситуация уже использована в городе «${situationCity}».`;
+    }
+    return "";
+  }
+
+  if (question.id === "city") {
+    if (cityQuotaSituation(value)) {
+      return `Квота по городу «${value}» уже закрыта.`;
+    }
+    return "";
+  }
 
   if (question.quota && quotaCount(question.id, value) >= question.quota) {
     return `Квота по городу «${value}» уже заполнена (${question.quota} из ${question.quota}).`;
@@ -869,7 +958,18 @@ function quotaFailureFor(question, value) {
 }
 
 function finalQuotaFailure() {
+  if (isTestSurvey()) return "";
+
+  if (cityQuotaSituation(answers.city)) {
+    return `Квота по городу «${answers.city}» уже закрыта.`;
+  }
+  const situationCity = situationQuotaCity(answers.purchaseSituation);
+  if (situationCity) {
+    return `Выбранная ситуация уже использована в городе «${situationCity}».`;
+  }
+
   for (const question of questions) {
+    if (question.id === "city" || question.situationQuota) continue;
     const reason = quotaFailureFor(question, answers[question.id]);
     if (reason) return reason;
   }
@@ -1221,9 +1321,14 @@ function renderQuestion() {
       const checked = inputType === "checkbox"
         ? (Array.isArray(previous) && previous.includes(label))
         : previous === label;
+      const situationClosed = Boolean(
+        question.situationQuota && situationQuotaCity(label)
+      );
+      const disabled = situationClosed && !isTestSurvey();
       return `
-        <label class="option">
-          <input type="${inputType}" name="answer" value="${escapeHtml(label)}" ${checked ? "checked" : ""}>
+        <label class="option${disabled ? " is-disabled" : ""}">
+          <input type="${inputType}" name="answer" value="${escapeHtml(label)}"
+            ${checked && !disabled ? "checked" : ""} ${disabled ? "disabled" : ""}>
           <span class="option-body">
             <span class="option-label">${escapeHtml(optionDisplay(option))}</span>
             ${gateMetaHtml(gate)}
@@ -1266,7 +1371,7 @@ function renderQuestion() {
     ${qText(question, "preface") ? `<div class="script"><p>${escapeHtml(qText(question, "preface"))}</p></div>` : ""}
     <h2 class="${question.compactTitle ? "compact-title" : ""}">${escapeHtml(qText(question, "title"))}</h2>
     ${qText(question, "subtitle") ? `<p class="lead">${escapeHtml(qText(question, "subtitle"))}</p>` : ""}
-    ${qText(question, "instruction") ? `<div class="instruction">${escapeHtml(qText(question, "instruction"))}</div>` : ""}
+    ${qText(question, "instruction") ? `<div class="instruction${question.italicInstruction ? " italic-instruction" : ""}">${escapeHtml(qText(question, "instruction"))}</div>` : ""}
     ${control}
     <div class="error" id="error" role="alert"></div>
     <div class="actions">
@@ -1983,7 +2088,8 @@ function rowsToSurveys(matrix) {
   const headers = matrix[0].map(cell => String(cell ?? "").trim());
   const required = [
     "ID анкеты", "Начало", "Завершение", "Статус", "Причина завершения",
-    "Тестовая анкета", "Интерес к участию"
+    "Тестовая анкета", "Интерес к участию", RESPONDENT_NAME_COLUMN,
+    ...questions.map(questionExportTitle)
   ];
   for (const header of required) {
     if (!headers.includes(header)) {
@@ -2007,12 +2113,6 @@ function rowsToSurveys(matrix) {
     for (const question of questions) {
       const column = questionExportTitle(question);
       let raw = get(column);
-      if (!raw && question.id === "phoneInitial") {
-        raw = get(PHONE_PRIMARY_COLUMN);
-      }
-      if (!raw && question.id === "phone") {
-        raw = readPhoneFromImport(get);
-      }
       if (question.type === "checkbox") {
         answers[question.id] = raw
           ? raw.split(/\s*;\s*/).map(part => part.trim()).filter(Boolean)
@@ -2021,16 +2121,6 @@ function rowsToSurveys(matrix) {
         answers[question.id] = raw;
       }
     }
-
-    if (!answers.phone) {
-      answers.phone = readPhoneFromImport(get);
-    }
-    if (!answers.phoneInitial) {
-      answers.phoneInitial = get(PHONE_PRIMARY_COLUMN) || answers.phone || "";
-    }
-    // Старые выгрузки могли содержать ID клиента — подхватываем, в новую не пишем.
-    const clientId = get("ID клиента");
-    if (clientId) answers.clientId = clientId;
 
     const id = get("ID анкеты") || (crypto.randomUUID
       ? crypto.randomUUID()
