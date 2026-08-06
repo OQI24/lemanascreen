@@ -30,6 +30,7 @@ const progressBar = document.getElementById("progressBar");
 const stepText = document.getElementById("stepText");
 const progressPercent = document.getElementById("progressPercent");
 const savedCount = document.getElementById("savedCount");
+const brandHome = document.getElementById("brandHome");
 const topbarTools = document.getElementById("topbarTools");
 const serviceMenu = document.getElementById("serviceMenu");
 const serviceToggle = document.getElementById("serviceToggle");
@@ -1457,6 +1458,18 @@ function readAnswer(question) {
   }
   return document.getElementById("answer").value.trim();
 }
+
+function goHome() {
+  answers = {};
+  startedAt = "";
+  currentIndex = 0;
+  pendingClient = null;
+  stopClientTimeTimer();
+  closeServiceMenu();
+  intro();
+}
+
+brandHome.onclick = () => goHome();
 
 function goBack() {
   const question = questions[currentIndex];

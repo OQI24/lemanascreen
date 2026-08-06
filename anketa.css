@@ -244,9 +244,27 @@ button, input, textarea, select { font: inherit; }
   align-items: center;
   gap: 0.625rem;
   min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
   font-weight: 700;
   font-size: var(--fs-brand);
   letter-spacing: -.01em;
+  transition: transform 0.12s var(--ease-press);
+}
+
+.brand:active {
+  transform: scale(0.92) translateY(1px);
+}
+
+.brand:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem var(--focus-ring);
 }
 
 .brand img {
@@ -552,7 +570,7 @@ button, input, textarea, select { font: inherit; }
 }
 
 .card.is-step-enter {
-  animation: step-enter 0.32s var(--ease-out) both;
+  animation: step-enter 0.5s var(--ease-out) both;
 }
 
 @keyframes step-enter {
