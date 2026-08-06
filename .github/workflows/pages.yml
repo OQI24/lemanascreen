@@ -6,18 +6,30 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
+# Важно: false — как в официальном шаблоне Pages.
+# true + ручная отмена mid-flight клинит очередь deploy-pages
+# (deployment_queued / сразу Deployment cancelled).
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
       - name: Prepare static site
         run: |
@@ -41,12 +53,11 @@ jobs:
           # иконки-ассеты без служебного _preview
           find assets/icons -maxdepth 1 -type f -name '*.svg' -exec cp {} _site/assets/icons/ \;
 
-      # Обход сломанной очереди actions/deploy-pages (deployment_queued / cancelled).
-      # Публикуем статику в ветку gh-pages, Pages читает её как source.
-      - name: Publish to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_site
-          force_orphan: true
-          commit_message: "Deploy ${{ github.sha }}"
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
